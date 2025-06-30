@@ -2,6 +2,7 @@
 "use client";
 
 import { Calendar, CreditCard, LayoutDashboard, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 import {
   Sidebar,
@@ -12,7 +13,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuBadge,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 // Menu items.
 const items = [
@@ -24,8 +27,8 @@ const items = [
     badge: "Coming Soon",
   },
   {
-    title: "Appointment",
-    url: "/appointment",
+    title: "Appointments",
+    url: "/appointments",
     icon: Calendar,
   },
   {
@@ -41,6 +44,8 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -50,34 +55,36 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="py-4 px-2">
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild={!item.disabled}
-                    tooltip={item.disabled ? item.badge : undefined}
-                    className={
-                      item.disabled ? "opacity-50 cursor-not-allowed" : ""
-                    }
-                  >
-                    {item.disabled ? (
-                      <div className="flex items-center">
-                        <item.icon />
-                        <span>{item.title}</span>
-                        {item.badge && (
-                          <span className="ml-auto text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild={!item.disabled}
+                      isActive={isActive && !item.disabled}
+                      tooltip={item.disabled ? item.badge : undefined}
+                      className={
+                        item.disabled ? "opacity-50 cursor-not-allowed" : ""
+                      }
+                    >
+                      {item.disabled ? (
+                        <div className="flex items-center gap-2">
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                          )}
+                        </div>
+                      ) : (
+                        <Link href={item.url} className="flex items-center">
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
