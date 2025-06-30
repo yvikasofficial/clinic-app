@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Calendar, CreditCard, LayoutDashboard, Users } from "lucide-react";
@@ -17,7 +18,7 @@ import {
 const items = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "/",
     icon: LayoutDashboard,
     disabled: true,
     badge: "Coming Soon",
@@ -43,9 +44,11 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Medical Practice</SidebarGroupLabel>
-          <SidebarGroupContent>
+        <SidebarGroup className="p-0">
+          <SidebarGroupLabel className="h-[64px] border-b rounded-none flex items-center justify-start px-4">
+            <img src="/assets/global/logo.svg" alt="logo" className="h-8" />
+          </SidebarGroupLabel>
+          <SidebarGroupContent className="py-4 px-2">
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
