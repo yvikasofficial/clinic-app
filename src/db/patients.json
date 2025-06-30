@@ -1,0 +1,78 @@
+[
+  {
+    "id": "pt_5f8a92a3eb28c15dc7a9a3d1",
+    "firstName": "Sarah",
+    "lastName": "Johnson",
+    "phoneNumber": "+12065551234",
+    "email": "sarah.johnson@example.com",
+    "address": "123 Main Street",
+    "addressLineTwo": "Apt 4B",
+    "city": "Seattle",
+    "state": "WA",
+    "zipCode": "98101",
+    "country": "USA",
+    "addressValid": true,
+    "guardianName": null,
+    "guardianPhoneNumber": null,
+    "maritalStatus": "MARRIED",
+    "gender": "FEMALE",
+    "employmentStatus": "EMPLOYED",
+    "dateOfBirth": "1985-07-15",
+    "allergies": ["Penicillin", "Peanuts"],
+    "familyHistory": ["Diabetes", "Hypertension"],
+    "medicalHistory": ["Asthma", "Seasonal allergies"],
+    "prescriptions": ["Albuterol inhaler", "Zyrtec"],
+    "goalWeight": 145,
+    "isOnboardingComplete": true,
+    "createdDate": "2022-03-15T10:30:00Z",
+    "firebaseUid": "firebase_uid_12345",
+    "measurements": [
+      {
+        "id": "ms_9d8c7b6a5f4e3d2c1b0a",
+        "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+        "type": "WEIGHT",
+        "value": 155.5,
+        "unit": "lb",
+        "date": "2023-08-12T14:20:00Z"
+      },
+      {
+        "id": "ms_8c7d6e5f4g3h2i1j0k",
+        "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+        "type": "HEIGHT",
+        "value": 65.5,
+        "unit": "in",
+        "date": "2023-08-12T14:20:00Z"
+      },
+      {
+        "id": "ms_7b6c5d4e3f2g1h0i9j",
+        "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+        "type": "BLOOD_PRESSURE",
+        "value": "120/80",
+        "unit": "mmHg",
+        "date": "2023-09-05T09:15:00Z"
+      }
+    ],
+    "medications": [
+      {
+        "id": "md_6f5e4d3c2b1a0z9y8x",
+        "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+        "name": "Albuterol",
+        "dosage": "90mcg",
+        "frequency": "As needed",
+        "startDate": "2022-05-10",
+        "endDate": null,
+        "active": true
+      },
+      {
+        "id": "md_5e4d3c2b1a0z9y8x7w",
+        "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+        "name": "Zyrtec",
+        "dosage": "10mg",
+        "frequency": "Once daily",
+        "startDate": "2023-02-20",
+        "endDate": null,
+        "active": true
+      }
+    ]
+  }
+]
