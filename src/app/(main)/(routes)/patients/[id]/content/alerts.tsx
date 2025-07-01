@@ -105,7 +105,7 @@ const Alerts = ({
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className="p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="p-3 hover:bg-red-100 transition-colors bg-red-50 cursor-pointer"
                   onClick={() => handleAlertClick(alert)}
                 >
                   <div className="flex items-center space-x-3">

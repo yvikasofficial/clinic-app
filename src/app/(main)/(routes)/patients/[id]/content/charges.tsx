@@ -52,7 +52,7 @@ const AmountCellRenderer = ({ data }: { data: Charge }) => {
     <div className="py-1 flex flex-col gap-0.5">
       <div className="font-semibold text-sm">${data.total.toFixed(2)}</div>
       {data.totalOutstanding > 0 && (
-        <div className="text-xs text-red-600 font-medium">
+        <div className="text-xs text-red-400 font-medium">
           Outstanding: ${data.totalOutstanding.toFixed(2)}
         </div>
       )}
@@ -228,14 +228,14 @@ const Charges = ({
     <div className="w-full space-y-6">
       {/* Header Section */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Patient Charges
-            </h2>
-            <p className="text-muted-foreground">
-              Manage and track all charges and payments for this patient
-            </p>
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold"> Charges</h2>
+              <p className="text-muted-foreground text-sm">
+                Manage and track all charges and payments for this patient
+              </p>
+            </div>
           </div>
           <Button
             onClick={handleCreatePayment}
@@ -265,13 +265,13 @@ const Charges = ({
 
           <div className="bg-card border rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-blue-500 rounded-full" />
+              <div className="h-4 w-4 bg-blue-400 rounded-full" />
               <h3 className="text-sm font-medium text-muted-foreground">
                 Total Paid
               </h3>
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-blue-400">
                 ${summaryStats.totalPaid.toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -282,13 +282,13 @@ const Charges = ({
 
           <div className="bg-card border rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-red-500 rounded-full" />
+              <div className="h-4 w-4 bg-red-400 rounded-full" />
               <h3 className="text-sm font-medium text-muted-foreground">
                 Outstanding
               </h3>
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-2xl font-bold text-red-400">
                 ${summaryStats.totalOutstanding.toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -300,13 +300,13 @@ const Charges = ({
 
           <div className="bg-card border rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-yellow-500 rounded-full" />
+              <div className="h-4 w-4 bg-yellow-400 rounded-full" />
               <h3 className="text-sm font-medium text-muted-foreground">
                 Partial Payments
               </h3>
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-yellow-400">
                 {summaryStats.statusCounts[ChargeStatus.PARTIALLY_PAID] || 0}
               </p>
               <p className="text-xs text-muted-foreground">
