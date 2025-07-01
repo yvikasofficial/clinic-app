@@ -1,3 +1,12 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function Home() {
-  return <div className="text-2xl font-bold h-[2000px]">Hello</div>;
+  const router = useRouter();
+  useEffect(() => {
+    router.push("/patients");
+  }, []);
+
+  return <div className="">Redirecting to patients...</div>;
 }

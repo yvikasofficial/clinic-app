@@ -12,9 +12,9 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  userName = "Dr. John Smith",
-  userPosition = "Chief Medical Officer",
-  userInitials = "JS",
+  userName = "Amy Smith",
+  userPosition = "Head of Staff",
+  userInitials = "AS",
 }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-background px-4">

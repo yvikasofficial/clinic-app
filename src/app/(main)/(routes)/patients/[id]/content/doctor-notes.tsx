@@ -15,7 +15,6 @@ import {
   User,
   Bot,
   FileCheck,
-  Timer,
   Hash,
   ChevronDown,
   Plus,
@@ -101,16 +100,6 @@ const DoctorNotes = ({
       hour: "numeric",
       minute: "2-digit",
     });
-  };
-
-  const formatDuration = (duration: number | null) => {
-    if (!duration) return "N/A";
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
   };
 
   // Sort notes by creation date (newest first)
@@ -232,12 +221,6 @@ const DoctorNotes = ({
                           <Clock className="h-3 w-3" />
                           <span>{formatTime(note.createdDate)}</span>
                         </div>
-                        {note.duration && (
-                          <div className="flex items-center gap-1">
-                            <Timer className="h-3 w-3" />
-                            <span>{formatDuration(note.duration)}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
