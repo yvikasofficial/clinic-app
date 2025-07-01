@@ -27,6 +27,9 @@ import PatientMemos from "./content/patient-memos";
 import DoctorNotes from "./content/doctor-notes";
 import { DoctorNote } from "@/types/doctorNote";
 import { useGetDoctorNotesByPatientId } from "@/services/doctorNotes/use-get-doctor-notes-by-patient-id";
+import { useGetChargesByPatientId } from "@/services/charges/use-get-charges-by-patient-id";
+import { Charge } from "@/types/charge";
+import Charges from "./content/charges";
 
 const PatientPage = () => {
   const { id } = useParams();
@@ -39,6 +42,9 @@ const PatientPage = () => {
   );
   const { data: doctorNotes, isLoading: doctorNotesLoading } =
     useGetDoctorNotesByPatientId(id as string);
+  const { data: charges, isLoading: chargesLoading } = useGetChargesByPatientId(
+    id as string
+  );
 
   const [activeTab, setActiveTab] = useState("medical");
 
@@ -89,10 +95,12 @@ const PatientPage = () => {
       ),
     },
     {
-      label: "Payments",
-      value: "payments",
+      label: "Charges",
+      value: "charges",
       icon: <CreditCard />,
-      component: <div>Payments</div>,
+      component: (
+        <Charges charges={charges as Charge[]} isLoading={chargesLoading} />
+      ),
     },
   ];
 
