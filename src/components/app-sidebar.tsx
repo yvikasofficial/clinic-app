@@ -56,7 +56,7 @@ export function AppSidebar() {
           <SidebarGroupContent className="py-4 px-2">
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = pathname === item.url;
+                const isActive = pathname.includes(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -64,7 +64,11 @@ export function AppSidebar() {
                       isActive={isActive && !item.disabled}
                       tooltip={item.disabled ? item.badge : undefined}
                       className={
-                        item.disabled ? "opacity-50 cursor-not-allowed" : ""
+                        item.disabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : isActive && !item.disabled
+                          ? "!bg-primary/10 !text-primary hover:!bg-primary/20"
+                          : ""
                       }
                     >
                       {item.disabled ? (
