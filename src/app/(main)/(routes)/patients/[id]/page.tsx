@@ -153,7 +153,7 @@ const PatientPage = () => {
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="bg-transparent !w-fit !shadow-none data-[state=active]:bg-transparent border-0 rounded-none px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-b-foreground"
+              className="bg-transparent text-gray-500 !w-fit !shadow-none data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-b-primary data-[state=active]:text-primary"
             >
               {tab.icon}
               {tab.label}
