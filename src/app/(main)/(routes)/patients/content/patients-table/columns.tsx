@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Patient, Status } from "@/types/patient";
+import { calculateAge, formatPhoneNumber } from "@/utils";
 import clsx from "clsx";
-import { formatNumber, parsePhoneNumberWithError } from "libphonenumber-js";
 import lodash from "lodash";
 
 // Status cell renderer for better visual representation
@@ -60,15 +60,6 @@ export const NameCellRenderer = ({ data }: { data: Patient }) => {
   );
 };
 
-// Format phone number to US format (xxx) xxx-xxxx
-export const formatPhoneNumber = (phoneNumber: string): string => {
-  try {
-    const parsed = parsePhoneNumberWithError(phoneNumber, "US");
-    return parsed ? formatNumber(parsed.number, "NATIONAL") : phoneNumber;
-  } catch {
-    return "N/A";
-  }
-};
 // Contact Details cell renderer
 export const ContactDetailsCellRenderer = ({ data }: { data: Patient }) => {
   return (
@@ -79,23 +70,6 @@ export const ContactDetailsCellRenderer = ({ data }: { data: Patient }) => {
       </div>
     </div>
   );
-};
-
-// Calculate age from date of birth
-export const calculateAge = (dateOfBirth: string): number => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
-
-  return age;
 };
 
 // Date of Birth and Age cell renderer

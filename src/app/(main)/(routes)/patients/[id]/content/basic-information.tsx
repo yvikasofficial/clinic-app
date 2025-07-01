@@ -3,7 +3,16 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Heart,
+  Briefcase,
+} from "lucide-react";
+import { calculateAge, formatPhoneNumber } from "@/utils";
 
 const BasicInformation = ({ patient }: { patient: Patient }) => {
   // Helper function to format date
@@ -15,26 +24,22 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
     });
   };
 
-  // Helper function to calculate age
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  };
-
   // Get initials from name
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Format marital status for display
+  const formatMaritalStatus = (status: string) => {
+    return status.charAt(0) + status.slice(1).toLowerCase();
+  };
+
+  // Format employment status for display
+  const formatEmploymentStatus = (status: string) => {
+    return status
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   return (
@@ -93,7 +98,29 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
               <Phone className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
-                <p className="text-sm font-medium">{patient.phoneNumber}</p>
+                <p className="text-sm font-medium">
+                  {formatPhoneNumber(patient.phoneNumber)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Marital Status</p>
+                <p className="text-sm font-medium">
+                  {formatMaritalStatus(patient.maritalStatus)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Employment</p>
+                <p className="text-sm font-medium">
+                  {formatEmploymentStatus(patient.employmentStatus)}
+                </p>
               </div>
             </div>
           </div>
