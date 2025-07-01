@@ -1,40 +1,19 @@
 import { Charge, ChargeStatus } from "@/types/charge";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Filter, X } from "lucide-react";
+import { Plus, CreditCard } from "lucide-react";
 import clsx from "clsx";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Status filter options
-const STATUS_FILTER_OPTIONS = [
-  { value: ChargeStatus.PAID, label: "Paid", color: "text-green-700" },
-  { value: ChargeStatus.UNPAID, label: "Unpaid", color: "text-red-700" },
-  {
-    value: ChargeStatus.PARTIALLY_PAID,
-    label: "Partially Paid",
-    color: "text-yellow-700",
-  },
-  { value: ChargeStatus.CANCELLED, label: "Cancelled", color: "text-gray-700" },
-  { value: ChargeStatus.REFUNDED, label: "Refunded", color: "text-purple-700" },
-];
-
 // Status cell renderer for charge status
 const ChargeStatusCellRenderer = ({ value }: { value: ChargeStatus }) => {
   const statusStyles = {
-    [ChargeStatus.PAID]: "bg-green-100 text-green-700",
+    [ChargeStatus.PAID]: "bg-blue-100 text-blue-700",
     [ChargeStatus.UNPAID]: "bg-red-100 text-red-700",
     [ChargeStatus.PARTIALLY_PAID]: "bg-yellow-100 text-yellow-700",
     [ChargeStatus.CANCELLED]: "bg-gray-100 text-gray-700",
@@ -42,7 +21,7 @@ const ChargeStatusCellRenderer = ({ value }: { value: ChargeStatus }) => {
   };
 
   const statusColors = {
-    [ChargeStatus.PAID]: "bg-green-500",
+    [ChargeStatus.PAID]: "bg-blue-500",
     [ChargeStatus.UNPAID]: "bg-red-500",
     [ChargeStatus.PARTIALLY_PAID]: "bg-yellow-500",
     [ChargeStatus.CANCELLED]: "bg-gray-500",
@@ -125,111 +104,12 @@ const PaymentsCellRenderer = ({ data }: { data: Charge }) => {
 
   return (
     <div className="py-1">
-      <div className="text-sm font-medium text-green-600">
+      <div className="text-sm font-medium text-blue-600">
         ${totalPaid.toFixed(2)}
       </div>
       <div className="text-xs text-gray-500">
         {totalPayments} payment{totalPayments !== 1 ? "s" : ""}
       </div>
-    </div>
-  );
-};
-
-// Filters component
-const FiltersDropdown = ({
-  selectedStatuses,
-  onStatusChange,
-  onClearFilters,
-}: {
-  selectedStatuses: ChargeStatus[];
-  onStatusChange: (statuses: ChargeStatus[]) => void;
-  onClearFilters: () => void;
-}) => {
-  const hasActiveFilters = selectedStatuses.length > 0;
-
-  const handleStatusToggle = (status: ChargeStatus) => {
-    const updatedStatuses = selectedStatuses.includes(status)
-      ? selectedStatuses.filter((s) => s !== status)
-      : [...selectedStatuses, status];
-    onStatusChange(updatedStatuses);
-  };
-
-  return (
-    <div className="flex items-center gap-2 mb-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={clsx(
-              "h-8 border-dashed",
-              hasActiveFilters && "border-primary bg-primary/5"
-            )}
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-            {hasActiveFilters && (
-              <Badge
-                variant="secondary"
-                className="ml-2 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-              >
-                {selectedStatuses.length}
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[200px]">
-          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {STATUS_FILTER_OPTIONS.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedStatuses.includes(option.value)}
-              onCheckedChange={() => handleStatusToggle(option.value)}
-              className="cursor-pointer"
-            >
-              <span>{option.label}</span>
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {hasActiveFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClearFilters}
-          className="h-8 px-2 lg:px-3"
-        >
-          Clear
-          <X className="ml-2 h-4 w-4" />
-        </Button>
-      )}
-
-      {hasActiveFilters && (
-        <div className="flex items-center gap-1 flex-wrap">
-          {selectedStatuses.map((status) => {
-            const option = STATUS_FILTER_OPTIONS.find(
-              (opt) => opt.value === status
-            );
-            return (
-              <Badge
-                key={status}
-                variant="secondary"
-                className="text-xs px-2 py-1"
-              >
-                {option?.label}
-                <button
-                  onClick={() => handleStatusToggle(status)}
-                  className="ml-1 hover:bg-secondary-foreground/10 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };
@@ -241,19 +121,33 @@ const Charges = ({
   charges: Charge[];
   isLoading: boolean;
 }) => {
-  // Filter state
-  const [selectedStatuses, setSelectedStatuses] = useState<ChargeStatus[]>([]);
+  // Calculate summary statistics
+  const summaryStats = useMemo(() => {
+    const totalCharges = charges.length;
+    const totalAmount = charges.reduce((sum, charge) => sum + charge.total, 0);
+    const totalOutstanding = charges.reduce(
+      (sum, charge) => sum + charge.totalOutstanding,
+      0
+    );
+    const totalPaid = totalAmount - totalOutstanding;
 
-  // Filter charges based on selected statuses
-  const filteredCharges = useMemo(() => {
-    if (selectedStatuses.length === 0) {
-      return charges;
-    }
-    return charges.filter((charge) => selectedStatuses.includes(charge.status));
-  }, [charges, selectedStatuses]);
+    const statusCounts = charges.reduce((acc, charge) => {
+      acc[charge.status] = (acc[charge.status] || 0) + 1;
+      return acc;
+    }, {} as Record<ChargeStatus, number>);
 
-  const handleClearFilters = () => {
-    setSelectedStatuses([]);
+    return {
+      totalCharges,
+      totalAmount,
+      totalOutstanding,
+      totalPaid,
+      statusCounts,
+    };
+  }, [charges]);
+
+  const handleCreatePayment = () => {
+    // TODO: Implement create payment functionality
+    console.log("Create new payment clicked");
   };
 
   // Column definitions for AG Grid
@@ -267,18 +161,6 @@ const Charges = ({
         cellRenderer: ({ value }: { value: string }) => (
           <div className="text-sm py-2 truncate" title={value}>
             {value || <span className="text-gray-500">No description</span>}
-          </div>
-        ),
-      },
-
-      {
-        headerName: "ID",
-        field: "id",
-        width: 120,
-        pinned: "left",
-        cellRenderer: ({ value }: { value: string }) => (
-          <div className="font-mono text-xs text-gray-600 py-2">
-            {value.slice(-8)}
           </div>
         ),
       },
@@ -343,19 +225,103 @@ const Charges = ({
   );
 
   return (
-    <div className="w-full">
-      <div className="flex justify-end">
-        <FiltersDropdown
-          selectedStatuses={selectedStatuses}
-          onStatusChange={setSelectedStatuses}
-          onClearFilters={handleClearFilters}
-        />
+    <div className="w-full space-y-6">
+      {/* Header Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Patient Charges
+            </h2>
+            <p className="text-muted-foreground">
+              Manage and track all charges and payments for this patient
+            </p>
+          </div>
+          <Button
+            onClick={handleCreatePayment}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create New Payment
+          </Button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Total Charges
+              </h3>
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold">{summaryStats.totalCharges}</p>
+              <p className="text-xs text-muted-foreground">
+                ${summaryStats.totalAmount.toFixed(2)} total value
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 bg-blue-500 rounded-full" />
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Total Paid
+              </h3>
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-blue-600">
+                ${summaryStats.totalPaid.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {summaryStats.statusCounts[ChargeStatus.PAID] || 0} paid charges
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 bg-red-500 rounded-full" />
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Outstanding
+              </h3>
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-red-600">
+                ${summaryStats.totalOutstanding.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {summaryStats.statusCounts[ChargeStatus.UNPAID] || 0} unpaid
+                charges
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 bg-yellow-500 rounded-full" />
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Partial Payments
+              </h3>
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-yellow-600">
+                {summaryStats.statusCounts[ChargeStatus.PARTIALLY_PAID] || 0}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Partially paid charges
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* Data Grid */}
       <div className="h-[400px] w-full">
         <AgGridReact
           loading={isLoading}
-          rowData={filteredCharges}
+          rowData={charges}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           pagination={false}

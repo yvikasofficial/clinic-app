@@ -69,13 +69,11 @@ const PatientMemos = ({
         patient={memos[0].patient}
       />
       {/* Header Section */}
-      <div className="flex items-end justify-between">
+      <div className="flex items-start justify-between">
         {/* Left Side - Information */}
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold tracking-tight">
-            Patient Memos
-          </h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 className="text-xl font-bold"> Patient Memos</h2>
+          <p className="text-muted-foreground text-sm">
             Clinical notes and observations from healthcare providers
           </p>
         </div>
