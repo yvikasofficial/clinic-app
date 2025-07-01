@@ -1,6 +1,7 @@
 import { Patient } from "@/types/patient";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -11,6 +12,7 @@ import {
   Calendar,
   Heart,
   Briefcase,
+  Edit,
 } from "lucide-react";
 import { calculateAge, formatPhoneNumber } from "@/utils";
 
@@ -42,32 +44,50 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
       .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
+  const handleEditClick = () => {
+    // TODO: Implement edit functionality
+    console.log("Edit user information clicked");
+  };
+
   return (
     <Card className="shadow-none h-[400px] bg-zinc-50">
       <CardContent className="space-y-4">
         {/* Profile Header */}
-        <div className="flex items-center gap-4">
-          <Avatar className="w-16 h-16">
-            <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
-              {getInitials(patient.firstName, patient.lastName)}
-            </AvatarFallback>
-          </Avatar>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
+                {getInitials(patient.firstName, patient.lastName)}
+              </AvatarFallback>
+            </Avatar>
 
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold">
-              {patient.firstName} {patient.lastName}
-            </h2>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline" className="text-xs">
-                <User className="w-3 h-3 mr-1" />
-                {patient.gender.charAt(0) +
-                  patient.gender.slice(1).toLowerCase()}
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                {calculateAge(patient.dateOfBirth)} years old
-              </span>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold">
+                {patient.firstName} {patient.lastName}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className="text-xs">
+                  <User className="w-3 h-3 mr-1" />
+                  {patient.gender.charAt(0) +
+                    patient.gender.slice(1).toLowerCase()}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {calculateAge(patient.dateOfBirth)} years old
+                </span>
+              </div>
             </div>
           </div>
+
+          {/* Edit Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleEditClick}
+            className="gap-2"
+          >
+            <Edit className="w-4 h-4" />
+            Edit Info
+          </Button>
         </div>
 
         <Separator />

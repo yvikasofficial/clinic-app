@@ -139,7 +139,9 @@ const PatientPage = () => {
         <div className="flex-1">
           <BasicInformation patient={patient as Patient} />
         </div>
-        <Alerts alerts={alerts as Alert[]} isLoading={alertsLoading} />
+        {alerts && alerts.length > 0 && (
+          <Alerts alerts={alerts as Alert[]} isLoading={alertsLoading} />
+        )}
       </div>
 
       {/* Tabs for patient information */}
