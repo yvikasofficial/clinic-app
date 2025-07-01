@@ -21,11 +21,17 @@ import { useState } from "react";
 import Events from "./content/events";
 import { useGetEventByPatientId } from "@/services/events/use-get-event-by-patinet-id";
 import { Event } from "@/types/event";
+import { useGetMemoByPatientId } from "@/services/memos/use-get-memo-by-patient-id";
+import { Memo } from "@/types/memo";
+import PatientMemos from "./content/patient-memos";
 
 const PatientPage = () => {
   const { id } = useParams();
   const { data: patient, isLoading, error } = useGetPatient(id as string);
   const { data: events, isLoading: eventsLoading } = useGetEventByPatientId(
+    id as string
+  );
+  const { data: memos, isLoading: memosLoading } = useGetMemoByPatientId(
     id as string
   );
   const [activeTab, setActiveTab] = useState("medical");
@@ -61,7 +67,9 @@ const PatientPage = () => {
       label: "Memos",
       value: "memos",
       icon: <FileText />,
-      component: <div>Memos</div>,
+      component: (
+        <PatientMemos memos={memos as Memo[]} isLoading={memosLoading} />
+      ),
     },
     {
       label: "Doctor Notes",

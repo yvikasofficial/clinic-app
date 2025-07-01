@@ -1,0 +1,111 @@
+import { Memo } from "@/types/memo";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FileText, Calendar, Clock } from "lucide-react";
+
+const PatientMemos = ({
+  memos,
+  isLoading,
+}: {
+  memos: Memo[];
+  isLoading: boolean;
+}) => {
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!memos || memos.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+        <h3 className="text-lg font-medium text-muted-foreground mb-2">
+          No memos found
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          There are no memos recorded for this patient yet.
+        </p>
+      </div>
+    );
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Helper function to format time
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
+  // Get initials from name
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Sort memos by creation date (newest first)
+  const sortedMemos = [...memos].sort(
+    (a, b) =>
+      new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Memos List */}
+      <div className="space-y-4">
+        {sortedMemos.map((memo) => (
+          <Card
+            key={memo.id}
+            className="!shadow-none hover:shadow-sm transition-shadow"
+          >
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                {/* Doctor Avatar */}
+                <Avatar className="h-10 w-10 flex-shrink-0">
+                  <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
+                    {getInitials(memo.creator.firstName, memo.creator.lastName)}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Doctor Info and Date */}
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    Dr. {memo.creator.firstName} {memo.creator.lastName}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>{formatDate(memo.createdDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatTime(memo.createdDate)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0">
+              {/* Memo Content */}
+              <div className="bg-muted/30 rounded-lg p-4">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {memo.note}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default PatientMemos;
