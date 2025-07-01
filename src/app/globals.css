@@ -125,3 +125,8 @@ body {
   height: 100vh;
   overscroll-behavior: none;
 }
+
+.ag-cell {
+  display: flex;
+  align-items: center;
+}

@@ -3,7 +3,7 @@
     {
       "id": "pt_5f8a92a3eb28c15dc7a9a3d1",
       "firstName": "Sarah",
-      "status": "ACTIVE",
+      "status": "active",
       "lastName": "Johnson",
       "phoneNumber": "+12065551234",
       "email": "sarah.johnson@example.com",
@@ -22,7 +22,12 @@
       "dateOfBirth": "1985-07-15",
       "allergies": ["Penicillin", "Peanuts"],
       "familyHistory": ["Diabetes", "Hypertension"],
-      "medicalHistory": ["Asthma", "Seasonal allergies"],
+      "medicalHistory": [
+        "Asthma",
+        "Seasonal allergies",
+        "High blood pressure",
+        "Migraines"
+      ],
       "prescriptions": ["Albuterol inhaler", "Zyrtec"],
       "goalWeight": 145,
       "isOnboardingComplete": true,

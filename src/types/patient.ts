@@ -22,8 +22,8 @@ export enum EmploymentStatus {
 }
 
 export enum Status {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
+  ACTIVE = "active",
+  INACTIVE = "inactive",
 }
 
 export enum MeasurementType {
