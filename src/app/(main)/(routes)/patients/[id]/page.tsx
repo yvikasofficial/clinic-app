@@ -18,11 +18,21 @@ import MedicalInformation from "./content/medical-information";
 import { Calendar, CreditCard, FileText, HeartPulse } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import Events from "./content/events";
+import { useGetEventByPatientId } from "@/services/events/use-get-event-by-patinet-id";
+import { Event } from "@/types/event";
 
 const PatientPage = () => {
   const { id } = useParams();
   const { data: patient, isLoading, error } = useGetPatient(id as string);
+  const { data: events, isLoading: eventsLoading } = useGetEventByPatientId(
+    id as string
+  );
   const [activeTab, setActiveTab] = useState("medical");
+
+  if (!isLoading && !patient) {
+    return <div>Patient not found</div>;
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -43,7 +53,9 @@ const PatientPage = () => {
       label: "Appointments",
       value: "appointments",
       icon: <Calendar />,
-      component: <div>Appointments</div>,
+      component: (
+        <Events events={events as Event[]} isLoading={eventsLoading} />
+      ),
     },
     {
       label: "Memos",
