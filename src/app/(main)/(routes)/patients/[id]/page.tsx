@@ -24,6 +24,9 @@ import { Event } from "@/types/event";
 import { useGetMemoByPatientId } from "@/services/memos/use-get-memo-by-patient-id";
 import { Memo } from "@/types/memo";
 import PatientMemos from "./content/patient-memos";
+import DoctorNotes from "./content/doctor-notes";
+import { DoctorNote } from "@/types/doctorNote";
+import { useGetDoctorNotesByPatientId } from "@/services/doctorNotes/use-get-doctor-notes-by-patient-id";
 
 const PatientPage = () => {
   const { id } = useParams();
@@ -34,6 +37,9 @@ const PatientPage = () => {
   const { data: memos, isLoading: memosLoading } = useGetMemoByPatientId(
     id as string
   );
+  const { data: doctorNotes, isLoading: doctorNotesLoading } =
+    useGetDoctorNotesByPatientId(id as string);
+
   const [activeTab, setActiveTab] = useState("medical");
 
   if (!isLoading && !patient) {
@@ -75,7 +81,12 @@ const PatientPage = () => {
       label: "Doctor Notes",
       value: "doctor-notes",
       icon: <FileText />,
-      component: <div>Doctor Notes</div>,
+      component: (
+        <DoctorNotes
+          doctorNotes={doctorNotes as DoctorNote[]}
+          isLoading={doctorNotesLoading}
+        />
+      ),
     },
     {
       label: "Payments",
