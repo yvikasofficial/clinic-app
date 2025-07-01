@@ -103,16 +103,13 @@ const DoctorNotes = ({
     <div className="space-y-6">
       <div className="space-y-4">
         {sortedNotes.map((note) => (
-          <Card
-            key={note.id}
-            className="shadow-none hover:shadow-sm transition-shadow"
-          >
+          <Card key={note.id} className="shadow-none bg-zinc-50 !gap-2">
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {/* Provider Icon instead of Patient Avatar */}
-                  <div className="h-10 w-10 flex-shrink-0 bg-secondary rounded-full flex items-center justify-center">
-                    <User className="h-5 w-5 text-secondary-foreground" />
+                  <div className="h-10 w-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary-foreground" />
                   </div>
 
                   {/* Provider Names and Date */}
@@ -188,7 +185,7 @@ const DoctorNotes = ({
 
               {/* Collapsible Note Content */}
               <Collapsible defaultOpen={false}>
-                <div className="bg-muted/30 rounded-lg">
+                <div className="bg-white rounded-lg border border-border">
                   <CollapsibleTrigger className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors [&[data-state=open]>svg:last-child]:rotate-180">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />

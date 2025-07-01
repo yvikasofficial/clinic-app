@@ -23,7 +23,6 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   AlertCircleIcon,
-  EyeIcon,
 } from "lucide-react";
 
 interface FullEventModalProps {
@@ -89,10 +88,9 @@ const FullEventModal = ({ event, trigger }: FullEventModalProps) => {
     <Sheet>
       <SheetTrigger asChild>
         {trigger || (
-          <Button variant="outline" size="sm">
-            <EyeIcon className="w-4 h-4" />
-            View Details
-          </Button>
+          <span className="text-sm text-primary font-medium cursor-pointer">
+            View all details
+          </span>
         )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-4">
@@ -237,7 +235,7 @@ const FullEventModal = ({ event, trigger }: FullEventModalProps) => {
                     {getConfirmationStatusIcon(
                       event.appointment.confirmationStatus
                     )}
-                    <Badge variant="outline">
+                    <Badge variant="secondary">
                       {event.appointment.confirmationStatus}
                     </Badge>
                   </div>

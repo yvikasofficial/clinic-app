@@ -130,3 +130,11 @@ body {
   display: flex;
   align-items: center;
 }
+
+a {
+  cursor: pointer !important;
+}
+
+button {
+  cursor: pointer !important;
+}

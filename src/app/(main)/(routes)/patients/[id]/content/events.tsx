@@ -87,7 +87,7 @@ const Events = ({
     <div className="space-y-6">
       <div className="grid gap-4">
         {appointments.map((event) => (
-          <Card key={event.id} className="shadow-none">
+          <Card key={event.id} className="shadow-none bg-zinc-50">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-1">

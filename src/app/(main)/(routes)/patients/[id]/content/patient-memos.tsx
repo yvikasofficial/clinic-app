@@ -63,9 +63,9 @@ const PatientMemos = ({
         {sortedMemos.map((memo) => (
           <Card
             key={memo.id}
-            className="!shadow-none hover:shadow-sm transition-shadow"
+            className="!shadow-none hover:shadow-sm transition-shadow bg-zinc-50 gap-3"
           >
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-0">
               <div className="flex items-center gap-3">
                 {/* Doctor Avatar */}
                 <Avatar className="h-10 w-10 flex-shrink-0">
@@ -95,9 +95,9 @@ const PatientMemos = ({
 
             <CardContent className="pt-0">
               {/* Memo Content */}
-              <div className="bg-muted/30 rounded-lg p-4">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {memo.note}
+              <div className="bg-white rounded-lg p-4 border-border border">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap italic">
+                  &quot;{memo.note}&quot;
                 </p>
               </div>
             </CardContent>
