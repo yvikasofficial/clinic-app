@@ -8,13 +8,9 @@ import { Patient, Status } from "@/types/patient";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import clsx from "clsx";
 import lodash from "lodash";
+import { parsePhoneNumberWithError, formatNumber } from "libphonenumber-js";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -22,7 +18,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const StatusCellRenderer = ({ value }: { value: Status }) => {
   const statusStyles = {
     [Status.ACTIVE]: "bg-blue-100 text-blue-500",
-    [Status.INACTIVE]: "bg-red-100 text-red-800",
+    [Status.INACTIVE]: "bg-red-100 text-red-500",
   };
 
   return (
@@ -31,7 +27,12 @@ const StatusCellRenderer = ({ value }: { value: Status }) => {
       className={clsx(statusStyles[value], "rounded-sm py-1.5 px-2.5 text-xs")}
     >
       <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <div
+          className={clsx(
+            "w-1.5 h-1.5 rounded-full",
+            value === Status.ACTIVE ? "bg-blue-500" : "bg-red-500"
+          )}
+        />
         {lodash.capitalize(value.toLowerCase())}
       </div>
     </Badge>
@@ -56,7 +57,10 @@ const NameCellRenderer = ({ data }: { data: Patient }) => {
           <span className="font-medium leading-[20px]">
             {`${data.firstName} ${data.lastName}`}
           </span>
-          <Badge variant="secondary" className="text-xs text-gray-600">
+          <Badge
+            variant="secondary"
+            className="text-xs text-gray-600 py-0.5 px-1.5 rounded-sm"
+          >
             {data.gender?.toLowerCase() === "male" ? "Male" : "Female"}
           </Badge>
         </div>
@@ -67,80 +71,21 @@ const NameCellRenderer = ({ data }: { data: Patient }) => {
 
 // Format phone number to US format (xxx) xxx-xxxx
 const formatPhoneNumber = (phoneNumber: string): string => {
-  // Remove all non-digit characters
-  const digits = phoneNumber.replace(/\D/g, "");
-
-  // Handle US phone numbers (10 digits) with or without country code
-  if (digits.length === 11 && digits.startsWith("1")) {
-    // Remove country code if present
-    const phoneDigits = digits.slice(1);
-    return `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(
-      3,
-      6
-    )}-${phoneDigits.slice(6)}`;
-  } else if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  try {
+    const parsed = parsePhoneNumberWithError(phoneNumber, "US");
+    return parsed ? formatNumber(parsed.number, "NATIONAL") : phoneNumber;
+  } catch {
+    return "N/A";
   }
-
-  // Return original if not a standard US phone number format
-  return phoneNumber;
 };
-
 // Contact Details cell renderer
 const ContactDetailsCellRenderer = ({ data }: { data: Patient }) => {
   return (
-    <div className="py-1">
-      <div className="text-sm font-medium">{data.email}</div>
+    <div className="py-1 flex flex-col gap-0.5">
+      <div className="font-medium text-sm">{data.email}</div>
       <div className="text-xs text-gray-500">
         {formatPhoneNumber(data.phoneNumber)}
       </div>
-    </div>
-  );
-};
-
-const MedicalHistoryCellRenderer = ({ value }: { value: string[] }) => {
-  if (!value || value.length === 0) {
-    return <div className="text-gray-500">N/A</div>;
-  }
-
-  const displayItems = value.slice(0, 2);
-  const remainingItems = value.slice(2);
-  const remainingCount = remainingItems.length;
-
-  return (
-    <div className="flex flex-wrap gap-1">
-      {displayItems.map((item, index) => (
-        <Badge
-          key={index}
-          variant="secondary"
-          className="text-xs inline-block max-w-[120px] truncate bg-red-100 text-red-600"
-          title={item}
-        >
-          {item}
-        </Badge>
-      ))}
-      {remainingCount > 0 && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge
-              variant="outline"
-              className="text-xs bg-red-100 text-red-600 cursor-help"
-            >
-              +{remainingCount}
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-xs">
-            <div className="flex flex-col gap-1">
-              <div className="text-sm font-medium mb-1">More conditions:</div>
-              {remainingItems.map((item, index) => (
-                <div key={index} className="text-xs">
-                  • {item}
-                </div>
-              ))}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      )}
     </div>
   );
 };
@@ -189,7 +134,7 @@ const PatientsPage = () => {
         headerName: "Name",
         field: "firstName",
         cellRenderer: NameCellRenderer,
-        minWidth: 200,
+        minWidth: 250,
         sort: "asc",
         flex: 1,
       },
@@ -197,7 +142,7 @@ const PatientsPage = () => {
         headerName: "Contact Details",
         field: "email",
         cellRenderer: ContactDetailsCellRenderer,
-        minWidth: 250,
+        minWidth: 300,
         sortable: false,
         flex: 1,
       },
@@ -208,17 +153,10 @@ const PatientsPage = () => {
         width: 200,
       },
       {
-        headerName: "Medical History",
-        field: "medicalHistory",
-        cellRenderer: MedicalHistoryCellRenderer,
-        minWidth: 240,
-        flex: 1,
-      },
-      {
         headerName: "Status",
         field: "status",
         cellRenderer: StatusCellRenderer,
-        width: 150,
+        width: 180,
       },
       {
         headerName: "Created Date",
