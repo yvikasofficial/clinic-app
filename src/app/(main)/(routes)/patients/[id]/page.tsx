@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import BasicInformation from "./content/basic-information";
 import { Patient } from "@/types/patient";
+import MedicalInformation from "./content/medical-information";
 
 const PatientPage = () => {
   const { id } = useParams();
@@ -53,6 +54,7 @@ const PatientPage = () => {
 
       {/* Main content will go here */}
       <BasicInformation patient={patient as Patient} />
+      <MedicalInformation patient={patient as Patient} />
     </div>
   );
 };
