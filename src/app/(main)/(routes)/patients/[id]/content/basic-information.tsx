@@ -43,7 +43,7 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
   };
 
   return (
-    <Card className="shadow-none h-[400px]">
+    <Card className="shadow-none h-[400px] bg-zinc-50">
       <CardContent className="space-y-4">
         {/* Profile Header */}
         <div className="flex items-center gap-4">
@@ -76,8 +76,8 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Contact Info */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Born</p>
                 <p className="text-sm font-medium">
@@ -86,16 +86,16 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
                 <p className="text-sm font-medium">{patient.email}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
                 <p className="text-sm font-medium">
@@ -104,8 +104,8 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Heart className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <Heart className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Marital Status</p>
                 <p className="text-sm font-medium">
@@ -114,8 +114,8 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <Briefcase className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Employment</p>
                 <p className="text-sm font-medium">

@@ -91,7 +91,7 @@ const Alerts = ({
 
   return (
     <>
-      <div className="w-[350px] h-[400px] overflow-y-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="w-[350px] h-[400px] overflow-y-auto bg-zinc-50 rounded-lg border border-gray-200 shadow-sm">
         <div className="p-4 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900">Alerts</h3>
           <p className="text-sm text-gray-500">{alerts.length} active alerts</p>

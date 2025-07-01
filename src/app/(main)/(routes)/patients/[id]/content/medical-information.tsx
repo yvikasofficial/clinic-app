@@ -107,7 +107,7 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {vitalStats.map((stat, index) => (
-            <div key={index} className="bg-card border rounded-lg p-4">
+            <div key={index} className="bg-zinc-50 border rounded-lg p-4 ">
               <div className="flex items-center justify-between mb-3">
                 <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 <div className="flex items-center text-xs text-muted-foreground">
@@ -124,7 +124,7 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
         </div>
 
         {/* Medical Information Grid - More compact */}
-        <div className="bg-card border rounded-lg p-4">
+        <div className="bg-zinc-50 border rounded-lg p-4 ">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Left Column - Badges */}
             <div className="space-y-4">
@@ -271,7 +271,7 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
 
         {/* Progress Indicator - More compact */}
         {latestWeight && (
-          <div className="mt-6 bg-card border rounded-lg p-4">
+          <div className="mt-6 bg-zinc-50 border rounded-lg p-4">
             <div className="flex items-center mb-3">
               <TrendingDown className="h-5 w-5 text-purple-600 mr-2" />
               <h2 className="text-lg font-semibold text-foreground">
