@@ -103,70 +103,58 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
   const activeMedications = patient.medications.filter((med) => med.active);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Medical Information
-          </h1>
-          <p className="text-muted-foreground">
-            Comprehensive medical overview for {patient.firstName}{" "}
-            {patient.lastName}
-          </p>
-        </div>
-
-        {/* Vital Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="">
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {vitalStats.map((stat, index) => (
-            <div key={index} className="bg-card border rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <stat.icon className={`h-8 w-8 ${stat.iconColor}`} />
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-1" />
+            <div key={index} className="bg-card border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3 mr-1" />
                   {stat.date}
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h3 className="text-sm font-semibold text-foreground mb-1">
                 {stat.label}
               </h3>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-lg font-bold text-foreground">{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Medical Information Grid */}
-        <div className="bg-card border rounded-xl p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Medical Information Grid - More compact */}
+        <div className="bg-card border rounded-lg p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Left Column - Badges */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Allergies */}
               <div>
-                <div className="flex items-center mb-3">
-                  <AlertTriangle className="h-5 w-5 text-orange-600 mr-2" />
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="flex items-center mb-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-600 mr-2" />
+                  <h3 className="text-base font-semibold text-foreground">
                     Allergies
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {patient.allergies.length > 0 ? (
                     <>
                       {patient.allergies.slice(0, 3).map((allergy, index) => (
                         <span
                           key={index}
-                          className="bg-orange-100 text-orange-800 text-sm font-medium px-3 py-1 rounded-full border border-orange-200"
+                          className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-1 rounded-full border border-orange-200"
                         >
                           {allergy}
                         </span>
                       ))}
                       {patient.allergies.length > 3 && (
-                        <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                        <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                           +{patient.allergies.length - 3} more
                         </span>
                       )}
                     </>
                   ) : (
-                    <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                       No known allergies
                     </span>
                   )}
@@ -175,13 +163,13 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
 
               {/* Family History */}
               <div>
-                <div className="flex items-center mb-3">
-                  <Users className="h-5 w-5 text-indigo-600 mr-2" />
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="flex items-center mb-2">
+                  <Users className="h-4 w-4 text-indigo-600 mr-2" />
+                  <h3 className="text-base font-semibold text-foreground">
                     Family History
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {patient.familyHistory.length > 0 ? (
                     <>
                       {patient.familyHistory
@@ -189,19 +177,19 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
                         .map((condition, index) => (
                           <span
                             key={index}
-                            className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full border border-indigo-200"
+                            className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-full border border-indigo-200"
                           >
                             {condition}
                           </span>
                         ))}
                       {patient.familyHistory.length > 3 && (
-                        <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                        <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                           +{patient.familyHistory.length - 3} more
                         </span>
                       )}
                     </>
                   ) : (
-                    <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                       No family history recorded
                     </span>
                   )}
@@ -210,13 +198,13 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
 
               {/* Medical History */}
               <div>
-                <div className="flex items-center mb-3">
-                  <FileText className="h-5 w-5 text-teal-600 mr-2" />
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="flex items-center mb-2">
+                  <FileText className="h-4 w-4 text-teal-600 mr-2" />
+                  <h3 className="text-base font-semibold text-foreground">
                     Medical History
                   </h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {patient.medicalHistory.length > 0 ? (
                     <>
                       {patient.medicalHistory
@@ -224,19 +212,19 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
                         .map((condition, index) => (
                           <span
                             key={index}
-                            className="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full border border-teal-200"
+                            className="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-1 rounded-full border border-teal-200"
                           >
                             {condition}
                           </span>
                         ))}
                       {patient.medicalHistory.length > 3 && (
-                        <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                        <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                           +{patient.medicalHistory.length - 3} more
                         </span>
                       )}
                     </>
                   ) : (
-                    <span className="bg-muted text-muted-foreground text-sm font-medium px-3 py-1 rounded-full border">
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2.5 py-1 rounded-full border">
                       No medical history recorded
                     </span>
                   )}
@@ -246,32 +234,32 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
 
             {/* Right Column - Active Medications */}
             <div>
-              <div className="flex items-center mb-3">
-                <Pill className="h-5 w-5 text-pink-600 mr-2" />
-                <h3 className="text-lg font-semibold text-foreground">
+              <div className="flex items-center mb-2">
+                <Pill className="h-4 w-4 text-pink-600 mr-2" />
+                <h3 className="text-base font-semibold text-foreground">
                   Active Medications
                 </h3>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {activeMedications.length > 0 ? (
                   activeMedications.map((medication, index) => (
-                    <div key={index} className="bg-muted rounded-lg p-4 border">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-foreground">
+                    <div key={index} className="bg-muted rounded-lg p-3 border">
+                      <div className="flex justify-between items-start mb-1">
+                        <h4 className="text-sm font-semibold text-foreground">
                           {medication.name}
                         </h4>
-                        <span className="text-sm text-muted-foreground bg-muted-foreground/10 px-2 py-1 rounded-full">
+                        <span className="text-xs text-muted-foreground bg-muted-foreground/10 px-2 py-0.5 rounded-full">
                           {medication.dosage}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {medication.frequency}
                       </p>
                     </div>
                   ))
                 ) : (
-                  <div className="bg-muted rounded-lg p-4 border">
-                    <span className="font-medium text-muted-foreground">
+                  <div className="bg-muted rounded-lg p-3 border">
+                    <span className="text-sm font-medium text-muted-foreground">
                       No active medications
                     </span>
                   </div>
@@ -281,36 +269,36 @@ const MedicalInformation = ({ patient }: { patient: Patient }) => {
           </div>
         </div>
 
-        {/* Progress Indicator */}
+        {/* Progress Indicator - More compact */}
         {latestWeight && (
-          <div className="mt-8 bg-card border rounded-xl p-6">
-            <div className="flex items-center mb-4">
-              <TrendingDown className="h-6 w-6 text-purple-600 mr-3" />
-              <h2 className="text-xl font-semibold text-foreground">
+          <div className="mt-6 bg-card border rounded-lg p-4">
+            <div className="flex items-center mb-3">
+              <TrendingDown className="h-5 w-5 text-purple-600 mr-2" />
+              <h2 className="text-lg font-semibold text-foreground">
                 Weight Progress
               </h2>
             </div>
             <div className="flex items-center justify-between">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Current</p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xs text-muted-foreground mb-1">Current</p>
+                <p className="text-lg font-bold text-foreground">
                   {currentWeight} lbs
                 </p>
               </div>
-              <div className="flex-1 mx-6">
-                <div className="bg-muted rounded-full h-3">
+              <div className="flex-1 mx-4">
+                <div className="bg-muted rounded-full h-2">
                   <div
-                    className="bg-primary h-3 rounded-full transition-all duration-300"
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2 text-center">
+                <p className="text-xs text-muted-foreground mt-1 text-center">
                   {Math.round(progressPercentage)}% progress
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Goal</p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-xs text-muted-foreground mb-1">Goal</p>
+                <p className="text-lg font-bold text-foreground">
                   {goalWeight} lbs
                 </p>
               </div>
