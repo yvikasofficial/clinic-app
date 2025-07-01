@@ -21,6 +21,11 @@ export enum EmploymentStatus {
   STUDENT = "STUDENT",
 }
 
+export enum Status {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
 export enum MeasurementType {
   WEIGHT = "WEIGHT",
   HEIGHT = "HEIGHT",
@@ -69,6 +74,7 @@ export interface Patient {
   maritalStatus: MaritalStatus;
   gender: Gender;
   employmentStatus: EmploymentStatus;
+  status: Status;
   dateOfBirth: string; // Date in YYYY-MM-DD format
   allergies: string[];
   familyHistory: string[];
