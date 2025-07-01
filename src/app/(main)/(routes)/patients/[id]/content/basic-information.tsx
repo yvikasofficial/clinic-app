@@ -43,7 +43,7 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
   };
 
   return (
-    <Card className="shadow-none">
+    <Card className="shadow-none h-[400px]">
       <CardContent className="space-y-4">
         {/* Profile Header */}
         <div className="flex items-center gap-4">

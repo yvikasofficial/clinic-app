@@ -1,12 +1,35 @@
 import { Charge, ChargeStatus } from "@/types/charge";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Filter, X } from "lucide-react";
 import clsx from "clsx";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Status filter options
+const STATUS_FILTER_OPTIONS = [
+  { value: ChargeStatus.PAID, label: "Paid", color: "text-green-700" },
+  { value: ChargeStatus.UNPAID, label: "Unpaid", color: "text-red-700" },
+  {
+    value: ChargeStatus.PARTIALLY_PAID,
+    label: "Partially Paid",
+    color: "text-yellow-700",
+  },
+  { value: ChargeStatus.CANCELLED, label: "Cancelled", color: "text-gray-700" },
+  { value: ChargeStatus.REFUNDED, label: "Refunded", color: "text-purple-700" },
+];
 
 // Status cell renderer for charge status
 const ChargeStatusCellRenderer = ({ value }: { value: ChargeStatus }) => {
@@ -112,6 +135,105 @@ const PaymentsCellRenderer = ({ data }: { data: Charge }) => {
   );
 };
 
+// Filters component
+const FiltersDropdown = ({
+  selectedStatuses,
+  onStatusChange,
+  onClearFilters,
+}: {
+  selectedStatuses: ChargeStatus[];
+  onStatusChange: (statuses: ChargeStatus[]) => void;
+  onClearFilters: () => void;
+}) => {
+  const hasActiveFilters = selectedStatuses.length > 0;
+
+  const handleStatusToggle = (status: ChargeStatus) => {
+    const updatedStatuses = selectedStatuses.includes(status)
+      ? selectedStatuses.filter((s) => s !== status)
+      : [...selectedStatuses, status];
+    onStatusChange(updatedStatuses);
+  };
+
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className={clsx(
+              "h-8 border-dashed",
+              hasActiveFilters && "border-primary bg-primary/5"
+            )}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            Filters
+            {hasActiveFilters && (
+              <Badge
+                variant="secondary"
+                className="ml-2 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+              >
+                {selectedStatuses.length}
+              </Badge>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[200px]">
+          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {STATUS_FILTER_OPTIONS.map((option) => (
+            <DropdownMenuCheckboxItem
+              key={option.value}
+              checked={selectedStatuses.includes(option.value)}
+              onCheckedChange={() => handleStatusToggle(option.value)}
+              className="cursor-pointer"
+            >
+              <span>{option.label}</span>
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {hasActiveFilters && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClearFilters}
+          className="h-8 px-2 lg:px-3"
+        >
+          Clear
+          <X className="ml-2 h-4 w-4" />
+        </Button>
+      )}
+
+      {hasActiveFilters && (
+        <div className="flex items-center gap-1 flex-wrap">
+          {selectedStatuses.map((status) => {
+            const option = STATUS_FILTER_OPTIONS.find(
+              (opt) => opt.value === status
+            );
+            return (
+              <Badge
+                key={status}
+                variant="secondary"
+                className="text-xs px-2 py-1"
+              >
+                {option?.label}
+                <button
+                  onClick={() => handleStatusToggle(status)}
+                  className="ml-1 hover:bg-secondary-foreground/10 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Charges = ({
   charges,
   isLoading,
@@ -119,6 +241,21 @@ const Charges = ({
   charges: Charge[];
   isLoading: boolean;
 }) => {
+  // Filter state
+  const [selectedStatuses, setSelectedStatuses] = useState<ChargeStatus[]>([]);
+
+  // Filter charges based on selected statuses
+  const filteredCharges = useMemo(() => {
+    if (selectedStatuses.length === 0) {
+      return charges;
+    }
+    return charges.filter((charge) => selectedStatuses.includes(charge.status));
+  }, [charges, selectedStatuses]);
+
+  const handleClearFilters = () => {
+    setSelectedStatuses([]);
+  };
+
   // Column definitions for AG Grid
   const columnDefs: ColDef<Charge>[] = useMemo(
     () => [
@@ -206,22 +343,32 @@ const Charges = ({
   );
 
   return (
-    <div className="h-[400px] w-full">
-      <AgGridReact
-        loading={isLoading}
-        rowData={charges}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        pagination={false}
-        rowSelection="single"
-        animateRows={true}
-        enableCellTextSelection={true}
-        suppressCellFocus={true}
-        rowHeight={60}
-        headerHeight={45}
-        suppressRowClickSelection={false}
-        className="ag-theme-alpine"
-      />
+    <div className="w-full">
+      <div className="flex justify-end">
+        <FiltersDropdown
+          selectedStatuses={selectedStatuses}
+          onStatusChange={setSelectedStatuses}
+          onClearFilters={handleClearFilters}
+        />
+      </div>
+
+      <div className="h-[400px] w-full">
+        <AgGridReact
+          loading={isLoading}
+          rowData={filteredCharges}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          pagination={false}
+          rowSelection="single"
+          animateRows={true}
+          enableCellTextSelection={true}
+          suppressCellFocus={true}
+          rowHeight={60}
+          headerHeight={45}
+          suppressRowClickSelection={false}
+          className="ag-theme-alpine"
+        />
+      </div>
     </div>
   );
 };

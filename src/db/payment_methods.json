@@ -1,0 +1,32 @@
+[
+  {
+    "id": "pm_7y6t5r4e3w2q1z0x9",
+    "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+    "brand": "Visa",
+    "last4": "4242",
+    "expMonth": 12,
+    "expYear": 2025,
+    "accountHolderType": null,
+    "accountNumberLast4": null,
+    "bankName": null,
+    "routingNumber": null,
+    "description": "Primary Card",
+    "type": "CARD",
+    "isDefault": true
+  },
+  {
+    "id": "pm_6x5w4v3u2t1s0r9q8",
+    "patientId": "pt_5f8a92a3eb28c15dc7a9a3d1",
+    "brand": null,
+    "last4": null,
+    "expMonth": null,
+    "expYear": null,
+    "accountHolderType": "individual",
+    "accountNumberLast4": 9876,
+    "bankName": "Chase Bank",
+    "routingNumber": 123456789,
+    "description": "Checking Account",
+    "type": "BANK_ACCOUNT",
+    "isDefault": false
+  }
+]

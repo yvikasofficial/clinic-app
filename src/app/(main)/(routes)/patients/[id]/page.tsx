@@ -30,6 +30,9 @@ import { useGetDoctorNotesByPatientId } from "@/services/doctorNotes/use-get-doc
 import { useGetChargesByPatientId } from "@/services/charges/use-get-charges-by-patient-id";
 import { Charge } from "@/types/charge";
 import Charges from "./content/charges";
+import { useGetAlertsByPatientId } from "@/services/alerts/use-get-alerts-by-patient-id";
+import Alerts from "./content/alerts";
+import { Alert } from "@/types/alert";
 
 const PatientPage = () => {
   const { id } = useParams();
@@ -43,6 +46,9 @@ const PatientPage = () => {
   const { data: doctorNotes, isLoading: doctorNotesLoading } =
     useGetDoctorNotesByPatientId(id as string);
   const { data: charges, isLoading: chargesLoading } = useGetChargesByPatientId(
+    id as string
+  );
+  const { data: alerts, isLoading: alertsLoading } = useGetAlertsByPatientId(
     id as string
   );
 
@@ -129,7 +135,12 @@ const PatientPage = () => {
         </Breadcrumb>
       </div>
 
-      <BasicInformation patient={patient as Patient} />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <BasicInformation patient={patient as Patient} />
+        </div>
+        <Alerts alerts={alerts as Alert[]} isLoading={alertsLoading} />
+      </div>
 
       {/* Tabs for patient information */}
       <Tabs

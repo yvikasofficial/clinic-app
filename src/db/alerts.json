@@ -1,0 +1,133 @@
+{
+  "alerts": [
+    {
+      "id": "alrt_1a2b3c4d5e6f7g8h9i",
+      "type": "FORM_SUBMITTED",
+      "data": {
+        "id": "frm_sub_7d8e9f0a1b2c3d4e",
+        "name": "Allergy Questionnaire",
+        "patient": {
+          "id": "pt_caa017201f8b4ed9a013c869",
+          "firstName": "Sarah",
+          "lastName": "Johnson"
+        },
+        "submittedAt": "2023-10-02T11:15:00Z"
+      },
+      "createdDate": "2023-10-02T11:15:00Z",
+      "actionRequired": true,
+      "resolvedDate": null,
+      "tags": [
+        {
+          "id": "tag_5a4b3c2d1e",
+          "name": "Forms"
+        },
+        {
+          "id": "tag_6b5c4d3e2f",
+          "name": "Patient Intake"
+        }
+      ],
+      "assignedProvider": {
+        "id": "usr_3c4d5e6f7g8h9i0j1k",
+        "firstName": "Robert",
+        "lastName": "Davis",
+        "email": "robert.davis@decodahealth.com"
+      },
+      "resolvingProvider": null,
+      "occurances": 1,
+      "patient": {
+        "id": "pt_caa017201f8b4ed9a013c869",
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "email": "sarah.johnson@example.com",
+        "phoneNumber": "+12065551234"
+      }
+    },
+    {
+      "id": "alrt_2b3c4d5e6f7g8h9i0j",
+      "type": "APPOINTMENT_SCHEDULED",
+      "data": {
+        "id": "evt_0a1b2c3d4e5f6g7h8i9",
+        "title": "Annual Physical",
+        "start": "2024-03-20T11:00:00.000Z",
+        "end": "2024-03-20T12:00:00.000Z",
+        "organizer": {
+          "id": "usr_4d5e6f7g8h9i0j1k2l",
+          "firstName": "Emily",
+          "lastName": "Chen"
+        },
+        "appointment": {
+          "id": "apt_1b2c3d4e5f6g7h8i9j0",
+          "reason": "Annual physical examination",
+          "confirmationStatus": "CONFIRMED"
+        }
+      },
+      "createdDate": "2024-03-01T16:45:00Z",
+      "actionRequired": true,
+      "resolvedDate": null,
+      "tags": [
+        {
+          "id": "tag_7c6d5e4f3g",
+          "name": "Appointments"
+        }
+      ],
+      "assignedProvider": {
+        "id": "usr_4d5e6f7g8h9i0j1k2l",
+        "firstName": "Emily",
+        "lastName": "Chen",
+        "email": "emily.chen@decodahealth.com"
+      },
+      "resolvingProvider": null,
+      "occurances": 1,
+      "patient": {
+        "id": "pt_caa017201f8b4ed9a013c869",
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "email": "sarah.johnson@example.com",
+        "phoneNumber": "+12065551234"
+      }
+    },
+    {
+      "id": "alrt_3c4d5e6f7g8h9i0j1k",
+      "type": "MESSAGE_RECEIVED",
+      "data": {
+        "message": "Hello Dr. Davis, I've been experiencing increased allergy symptoms despite taking the medication as prescribed. Could we discuss other options?",
+        "data": {
+          "chatId": "cht_8g7f6e5d4c3b2a1z0y",
+          "messageType": "TEXT"
+        },
+        "patient": {
+          "id": "pt_5f8a92a3eb28c15dc7a9a3d1",
+          "firstName": "Sarah",
+          "lastName": "Johnson"
+        }
+      },
+      "createdDate": "2023-09-25T14:30:00Z",
+      "actionRequired": true,
+      "resolvedDate": null,
+      "tags": [
+        {
+          "id": "tag_8d7e6f5g4h",
+          "name": "Messages"
+        },
+        {
+          "id": "tag_9e8f7g6h5i",
+          "name": "Urgent"
+        }
+      ],
+      "assignedProvider": {
+        "id": "usr_3c4d5e6f7g8h9i0j1k",
+        "firstName": "Robert",
+        "lastName": "Davis",
+        "email": "robert.davis@decodahealth.com"
+      },
+      "resolvingProvider": null,
+      "patient": {
+        "id": "pt_caa017201f8b4ed9a013c869",
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "email": "sarah.johnson@example.com",
+        "phoneNumber": "+12065551234"
+      }
+    }
+  ]
+}
