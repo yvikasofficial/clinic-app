@@ -8,8 +8,16 @@ import {
   NameCellRenderer,
   StatusCellRenderer,
 } from "./columns";
+import { useRouter } from "next/navigation";
 
-const PatientsTable = ({ patients }: { patients: Patient[] }) => {
+const PatientsTable = ({
+  patients,
+  isLoading,
+}: {
+  patients: Patient[];
+  isLoading: boolean;
+}) => {
+  const router = useRouter();
   // Column definitions for AG Grid
   const columnDefs: ColDef<Patient>[] = useMemo(
     () => [
@@ -65,6 +73,7 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
 
   return (
     <AgGridReact
+      loading={isLoading}
       rowData={patients}
       columnDefs={columnDefs}
       defaultColDef={defaultColDef}
@@ -75,6 +84,12 @@ const PatientsTable = ({ patients }: { patients: Patient[] }) => {
       enableCellTextSelection={true}
       suppressCellFocus={true}
       rowHeight={60}
+      onRowClicked={(event) => {
+        const row = event.data;
+        if (row) {
+          router.push(`/patients/${row.id}`);
+        }
+      }}
     />
   );
 };

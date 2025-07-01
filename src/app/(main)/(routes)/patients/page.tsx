@@ -9,14 +9,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const PatientsPage = () => {
   const { data: patients = [], isLoading, error } = useGetPatients();
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-lg">Loading patients...</div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -39,7 +31,7 @@ const PatientsPage = () => {
 
       {/* AG Grid Table */}
       <div className="flex-1 ag-theme-alpine" style={{ height: "600px" }}>
-        <PatientsTable patients={patients} />
+        <PatientsTable patients={patients} isLoading={isLoading} />
       </div>
     </div>
   );
