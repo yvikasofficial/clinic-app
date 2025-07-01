@@ -228,34 +228,6 @@ const AlertDetailSheet = ({
               )}
             </div>
           </div>
-
-          {/* Patient Information */}
-          <div>
-            <h4 className="font-medium text-gray-900 mb-3">
-              Patient Information
-            </h4>
-            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Name:</span>
-                <span className="text-sm font-medium">
-                  {alert.patient.firstName} {alert.patient.lastName}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Email:</span>
-                <span className="text-sm font-medium">
-                  {alert.patient.email}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Phone:</span>
-                <span className="text-sm font-medium">
-                  {alert.patient.phoneNumber}
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* Type-specific details */}
           {renderAlertDetails(alert)}
 
