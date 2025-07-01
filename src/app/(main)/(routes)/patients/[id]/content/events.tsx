@@ -16,6 +16,7 @@ import {
   XCircleIcon,
   AlertCircleIcon,
   PlusIcon,
+  FileText,
 } from "lucide-react";
 import FullEventModal from "./full-event-modal";
 
@@ -48,8 +49,14 @@ const Events = ({
 
   if (!appointments || appointments.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No appointments found.</p>
+      <div className="text-center py-12">
+        <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+        <h3 className="text-lg font-medium text-muted-foreground mb-2">
+          No Appointments found
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          There are no appointments recorded for this patient yet.
+        </p>
       </div>
     );
   }
