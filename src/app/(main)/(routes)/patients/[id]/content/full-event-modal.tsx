@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -98,7 +97,6 @@ const FullEventModal = ({ event, trigger }: FullEventModalProps) => {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <SheetTitle className="text-xl">{event.title}</SheetTitle>
-              <SheetDescription>Event ID: {event.id}</SheetDescription>
             </div>
             <div className="flex gap-2">
               <Badge>{event.type}</Badge>
@@ -141,9 +139,6 @@ const FullEventModal = ({ event, trigger }: FullEventModalProps) => {
               </p>
               <p className="text-sm text-muted-foreground">
                 {event.organizer.email}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                ID: {event.organizer.id}
               </p>
             </div>
           </div>
@@ -247,21 +242,6 @@ const FullEventModal = ({ event, trigger }: FullEventModalProps) => {
                 <p className="text-sm text-muted-foreground">
                   {event.appointment.reason}
                 </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium">Patient ID</p>
-                  <p className="text-sm text-muted-foreground">
-                    {event.appointment.patientId}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Provider ID</p>
-                  <p className="text-sm text-muted-foreground">
-                    {event.appointment.providerId}
-                  </p>
-                </div>
               </div>
 
               {event.appointment.confirmationDate && (
