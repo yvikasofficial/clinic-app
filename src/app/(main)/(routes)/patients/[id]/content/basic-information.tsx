@@ -15,6 +15,7 @@ import {
   Edit,
 } from "lucide-react";
 import { calculateAge, formatPhoneNumber } from "@/utils";
+import { StatusCellRenderer } from "../../content/patients-table/columns";
 
 const BasicInformation = ({ patient }: { patient: Patient }) => {
   // Helper function to format date
@@ -79,15 +80,18 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
           </div>
 
           {/* Edit Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEditClick}
-            className="gap-2"
-          >
-            <Edit className="w-4 h-4" />
-            Edit Info
-          </Button>
+          <div className="flex items-center gap-2">
+            <StatusCellRenderer value={patient.status} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEditClick}
+              className="gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Info
+            </Button>
+          </div>
         </div>
 
         <Separator />
