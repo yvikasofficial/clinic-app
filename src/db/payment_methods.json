@@ -35,7 +35,7 @@
       "patientId": "pt_caa017201f8b4ed9a013c869",
       "type": "CARD",
       "description": "American Express Card ending in 5469",
-      "isDefault": false,
+      "isDefault": true,
       "brand": "American Express",
       "last4": "5469",
       "expMonth": 7,

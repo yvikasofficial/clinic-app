@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PaymentMethod, PaymentMethodType } from "@/types/paymentMethods";
 import { useCreatePaymentMethod } from "@/services/paymentMethods/use-create-payment-method";
+import { useUpdatePaymentMethod } from "@/services/paymentMethods/use-update-payment-method";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -66,6 +67,7 @@ const PaymentMethodsManager = ({
   const { id } = useParams();
 
   const createPaymentMethod = useCreatePaymentMethod();
+  const updatePaymentMethod = useUpdatePaymentMethod();
 
   const handleAddDummyMethod = () => {
     const brands = ["Visa", "MasterCard", "American Express", "Discover"];
@@ -195,13 +197,40 @@ const PaymentMethodsManager = ({
   };
 
   const handleSetDefaultPaymentMethod = (methodId: string) => {
-    const updatedMethods = localPaymentMethods.map((method) => ({
-      ...method,
-      isDefault: method.id === methodId,
-    }));
-    setLocalPaymentMethods(updatedMethods);
-    onPaymentMethodsChange?.(updatedMethods);
-    toast.success("Default payment method updated!");
+    const methodToUpdate = localPaymentMethods.find(
+      (method) => method.id === methodId
+    );
+
+    if (!methodToUpdate) {
+      toast.error("Payment method not found");
+      return;
+    }
+
+    updatePaymentMethod.mutate(
+      {
+        id: methodId,
+        patientId: methodToUpdate.patientId,
+        isDefault: true,
+      },
+      {
+        onSuccess: () => {
+          // Update local state - set the updated method as default and others as non-default
+          const updatedMethods = localPaymentMethods.map((method) => ({
+            ...method,
+            isDefault: method.id === methodId,
+          }));
+
+          setLocalPaymentMethods(updatedMethods);
+          onPaymentMethodsChange?.(updatedMethods);
+          toast.success("Default payment method updated!");
+        },
+        onError: (error) => {
+          toast.error(
+            error.message || "Failed to update default payment method"
+          );
+        },
+      }
+    );
   };
 
   const renderPaymentMethodsDisplay = () => {
@@ -339,6 +368,7 @@ const PaymentMethodsManager = ({
                           onChange={() =>
                             handleSetDefaultPaymentMethod(method.id)
                           }
+                          disabled={updatePaymentMethod.isPending}
                           className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                         />
                         <Label
@@ -385,6 +415,9 @@ const PaymentMethodsManager = ({
                   <p className="text-xs text-muted-foreground mt-2">
                     Select a radio button to set the default payment method for
                     charges.
+                    {updatePaymentMethod.isPending && (
+                      <span className="text-blue-600 ml-2">Updating...</span>
+                    )}
                   </p>
                 )}
               </div>
