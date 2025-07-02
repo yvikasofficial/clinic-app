@@ -234,7 +234,7 @@ const Charges = ({
     <div className="w-full space-y-6">
       {/* Header Section */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between mb-8">
           <div>
             <div className="space-y-1">
               <h2 className="text-xl font-bold"> Charges</h2>
