@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Decoda Founding Engineer - Take Home Assignment
 
-## Getting Started
+## Patient Profile Page Implementation
 
-First, run the development server:
+This project implements a patient profile page based on the provided sample patient data, designed to surface relevant patient information effectively and intuitively for healthcare professionals.
+
+## 📋 Assignment Requirements Checklist
+
+### Core Functionality
+
+- [x] **Patient Information Display**
+
+  - [x] Present important information about the patient in a clear and digestible manner
+  - [x] Information hierarchy prioritizes what matters most to doctors/front desk staff
+  - [x] Thoughtful consideration of what NOT to display to avoid information overload
+
+- [x] **Quick Actions**
+
+  - [x] Charge a payment method (functional button)
+  - [x] Create a memo (functional button)
+  - [x] Generate a doctor's note (functional button)
+  - [x] Additional relevant quick actions implemented
+
+- [x] **Additional Feature** (Choose one)
+  - [x] AI/LLM tool (summary generator, doctor's note generator, etc.)
+
+### Data Handling
+
+- [x] **Various Data Scenarios**
+  - [x] Handles patients with extensive records (many payments, notes, appointments)
+  - [x] Handles brand-new patients with no data
+  - [x] Handles partial data cases (e.g., 10 appointments but no doctor's notes)
+  - [x] Uses JSON file for initial state (no live API required)
+
+### Technical Implementation
+
+- [x] **Code Quality**
+
+  - [x] Good code structure and organization
+  - [x] Code is readable and well-commented
+  - [x] Proper component structure
+  - [x] Error handling implemented
+
+- [x] **Deployment**
+  - [x] Project deployed (Vercel, Netlify, etc.)
+  - [x] Live URL: https://clinic-app-rose.vercel.app/
+
+## 🚀 Getting Started
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Key Design Decisions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### User Considerations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [x] **Target Users**: Doctors, Front desk staff, etc.
+- [x] **Primary Use Cases**: Patient profile management, clinical documentation, payment processing
+- [x] **Key Workflows**: View patient info, create memos, generate doctor's notes, manage charges and payments
 
-## Learn More
+### Additional Features Implemented
 
-To learn more about Next.js, take a look at the following resources:
+- [x] **Feature 1**: Generate Doctor's note using Openrouter free LLM
+- [x] **Feature 2**: Comprehensive patient management system with tabbed interface
+- [x] **Feature 3**: Advanced data grid with AG Grid for charges and appointments
+- [x] **Feature 5**: Payment methods management
+- [x] **Feature 6**: Full CRUD operations for memos, charges, and doctor's notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 Notes & Future Improvements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Out of Scope (Due to Time Constraints) and would Add with More Time
 
-## Deploy on Vercel
+- [ ] Responsive UI for mobile screens
+- [ ] Real-time notifications
+- [ ] Advanced search and filtering
+- [ ] Bulk operations
+- [ ] Data export functionality
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Time Spent
+
+**Estimated Time**: 7hrs
+
+## Technology Stack
+
+- [x] Next.js/React
+- [x] TypeScript
+- [x] Tailwind CSS
+- [x] Shadcn UI Components
+- [x] AG Grid (Data Tables)
+- [x] React Query (Data Fetching)
+- [x] OpenRouter AI API (LLM Integration)
