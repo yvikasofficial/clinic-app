@@ -1,44 +1,56 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { Patient } from "@/types/patient";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   patients: Patient[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "patients.json");
+// JSONBin API configuration
+const PATIENTS_BIN_URL = jsonbin.PATIENTS;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { patients: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(PATIENTS_BIN_URL, "GET");
+    return response.record || { patients: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { patients: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(PATIENTS_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initDB() {
   try {
-    await db.read();
-
-    // Initialize with empty patients array if file doesn't exist
-    if (!db.data) {
-      db.data = { patients: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize database:", error);
-    throw new Error("Database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all patients
 export async function getPatients(): Promise<Patient[]> {
   try {
-    await db.read();
-    return db.data?.patients || [];
+    const data = await getData();
+    return data.patients || [];
   } catch (error) {
     console.error("Failed to get patients:", error);
     throw new Error("Failed to retrieve patients");
@@ -48,25 +60,21 @@ export async function getPatients(): Promise<Patient[]> {
 // Add a new patient
 export async function addPatient(patient: Patient): Promise<Patient> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { patients: [] };
-    }
-
     // Validate required fields
     if (!patient.id || !patient.firstName || !patient.lastName) {
       throw new Error("Missing required patient fields");
     }
 
+    const data = await getData();
+
     // Check if patient already exists
-    const existingPatient = db.data.patients.find((p) => p.id === patient.id);
+    const existingPatient = data.patients.find((p) => p.id === patient.id);
     if (existingPatient) {
       throw new Error("Patient with this ID already exists");
     }
 
-    db.data.patients.push(patient);
-    await db.write();
+    data.patients.push(patient);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/patients");
@@ -90,28 +98,25 @@ export async function updatePatient(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
-    const patientIndex = db.data?.patients.findIndex((p) => p.id === id) ?? -1;
+    const data = await getData();
+    const patientIndex = data.patients.findIndex((p) => p.id === id);
 
     if (patientIndex === -1) {
       throw new Error("Patient not found");
     }
 
-    if (db.data?.patients[patientIndex]) {
-      db.data.patients[patientIndex] = {
-        ...db.data.patients[patientIndex],
-        ...updates,
-      };
-      await db.write();
+    data.patients[patientIndex] = {
+      ...data.patients[patientIndex],
+      ...updates,
+    };
 
-      // Revalidate relevant pages
-      revalidatePath("/patients");
-      revalidatePath(`/patients/${id}`);
+    await saveData(data);
 
-      return db.data.patients[patientIndex];
-    }
+    // Revalidate relevant pages
+    revalidatePath("/patients");
+    revalidatePath(`/patients/${id}`);
 
-    return null;
+    return data.patients[patientIndex];
   } catch (error) {
     console.error("Failed to update patient:", error);
     throw new Error(
@@ -127,24 +132,20 @@ export async function deletePatient(id: string): Promise<boolean> {
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.patients.length || 0;
+    const data = await getData();
+    const initialLength = data.patients.length;
 
-    if (db.data?.patients) {
-      db.data.patients = db.data.patients.filter((p) => p.id !== id);
-      await db.write();
+    data.patients = data.patients.filter((p) => p.id !== id);
 
-      const deleted = db.data.patients.length < initialLength;
+    const deleted = data.patients.length < initialLength;
 
-      if (deleted) {
-        // Revalidate relevant pages
-        revalidatePath("/patients");
-      }
-
-      return deleted;
+    if (deleted) {
+      await saveData(data);
+      // Revalidate relevant pages
+      revalidatePath("/patients");
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete patient:", error);
     throw new Error("Failed to delete patient");
@@ -158,8 +159,8 @@ export async function getPatientById(id: string): Promise<Patient | null> {
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
-    return db.data?.patients.find((p) => p.id === id) || null;
+    const data = await getData();
+    return data.patients.find((p) => p.id === id) || null;
   } catch (error) {
     console.error("Failed to get patient by ID:", error);
     throw new Error("Failed to retrieve patient");
