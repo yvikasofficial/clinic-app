@@ -90,6 +90,31 @@ const DoctorNotes = ({
     );
   }
 
+  // Helper function to parse formatted notes
+  const parseNoteContent = (content: string) => {
+    if (!content) return content;
+
+    // Check if content contains markdown-style formatting
+    const hasMarkdownFormatting = content.includes("**");
+
+    if (!hasMarkdownFormatting) {
+      // Return content as-is if no formatting
+      return content;
+    }
+
+    // Parse markdown-style formatting
+    const parsedContent = content
+      // Convert **Header:** patterns to clean headers
+      .replace(/\*\*([^*]+?):\*\*/g, "$1:")
+      // Convert standalone **text** to just text
+      .replace(/\*\*([^*]+?)\*\*/g, "$1")
+      // Clean up extra whitespace and line breaks
+      .replace(/\n\s*\n/g, "\n\n")
+      .trim();
+
+    return parsedContent;
+  };
+
   // Helper functions
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -252,7 +277,7 @@ const DoctorNotes = ({
                       </span>
                     </div>
                     <p className="text-sm leading-relaxed text-foreground">
-                      {note.summary}
+                      {parseNoteContent(note.summary)}
                     </p>
                   </div>
                 )}
@@ -267,9 +292,9 @@ const DoctorNotes = ({
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down px-4 pb-4">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {note.content}
-                      </p>
+                      <pre className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                        {parseNoteContent(note.content)}
+                      </pre>
                     </CollapsibleContent>
                   </div>
                 </Collapsible>
