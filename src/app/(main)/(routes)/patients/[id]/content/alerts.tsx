@@ -8,6 +8,7 @@ import {
 import { format } from "date-fns";
 import { useState } from "react";
 import AlertDetailSheet from "./alert-detail-sheet";
+import { AlertCircle } from "lucide-react";
 
 const Alerts = ({
   alerts,
@@ -88,13 +89,15 @@ const Alerts = ({
 
   return (
     <>
-      <div className="w-[350px] h-[400px] overflow-y-auto bg-zinc-50 rounded-lg border border-gray-200 shadow-sm">
-        <div className="p-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">Alerts</h3>
-          <p className="text-sm text-gray-500">{alerts.length} active alerts</p>
+      <div className="w-[350px]  rounded-lg border border-red-100 shadow-sm">
+        <div className="p-2 border-b border-red-100">
+          <h3 className="text-md font-semibold text-gray-900 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            Alerts
+          </h3>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="h-[354px] overflow-y-auto p-2">
           {alerts.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">🔔</div>
@@ -105,7 +108,7 @@ const Alerts = ({
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className="p-3 hover:bg-red-100 transition-colors bg-red-50 cursor-pointer"
+                  className="p-3 hover:bg-red-100 transition-colors bg-red-50 cursor-pointer rounded-lg mb-2"
                   onClick={() => handleAlertClick(alert)}
                 >
                   <div className="flex items-center space-x-3">
