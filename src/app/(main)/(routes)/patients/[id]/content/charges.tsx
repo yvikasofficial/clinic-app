@@ -1,4 +1,4 @@
-import { Charge, ChargeStatus, PaymentMethod } from "@/types/charge";
+import { Charge, ChargeStatus } from "@/types/charge";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
@@ -8,6 +8,7 @@ import { Plus, CreditCard } from "lucide-react";
 import clsx from "clsx";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 import PaymentMethodsManager from "./payment-methods-manager";
+import { PaymentMethod } from "@/types/paymentMethods";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -250,7 +251,7 @@ const Charges = ({
             Create New Payment
           </Button>
           <PaymentMethodsManager
-            paymentMethods={paymentMethods}
+            paymentMethods={paymentMethods as PaymentMethod[]}
             isLoading={isPaymentMethodsLoading}
             onPaymentMethodsChange={() => {}}
           />

@@ -29,6 +29,51 @@
       "description": "Checking Account",
       "type": "BANK_ACCOUNT",
       "isDefault": false
+    },
+    {
+      "id": "pm_1751425291894_e6ahj2lff",
+      "patientId": "pt_caa017201f8b4ed9a013c869",
+      "type": "CARD",
+      "description": "American Express Card ending in 5469",
+      "isDefault": false,
+      "brand": "American Express",
+      "last4": "5469",
+      "expMonth": 7,
+      "expYear": 2030,
+      "accountHolderType": null,
+      "accountNumberLast4": null,
+      "bankName": null,
+      "routingNumber": null
+    },
+    {
+      "id": "pm_1751425298516_o1q0jxsq5",
+      "patientId": "pt_caa017201f8b4ed9a013c869",
+      "type": "CARD",
+      "description": "Visa Card ending in 5049",
+      "isDefault": false,
+      "brand": "Visa",
+      "last4": "5049",
+      "expMonth": 6,
+      "expYear": 2027,
+      "accountHolderType": null,
+      "accountNumberLast4": null,
+      "bankName": null,
+      "routingNumber": null
+    },
+    {
+      "id": "pm_1751425300432_6ctp340ll",
+      "patientId": "pt_caa017201f8b4ed9a013c869",
+      "type": "CARD",
+      "description": "MasterCard Card ending in 3153",
+      "isDefault": false,
+      "brand": "MasterCard",
+      "last4": "3153",
+      "expMonth": 11,
+      "expYear": 2030,
+      "accountHolderType": null,
+      "accountNumberLast4": null,
+      "bankName": null,
+      "routingNumber": null
     }
   ]
 }
