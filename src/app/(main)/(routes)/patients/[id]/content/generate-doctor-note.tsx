@@ -51,7 +51,7 @@ const GenerateDoctorNote = ({
   const [content, setContent] = useState("");
   const [summary, setSummary] = useState("");
   const [providerInput, setProviderInput] = useState("");
-  const [providers, setProviders] = useState<string[]>([]);
+  const [providers, setProviders] = useState<string[]>(["Dr John"]);
 
   // Generate AI content using OpenRouter
   const generateAIContent = async (appointmentData?: any) => {
@@ -149,7 +149,7 @@ const GenerateDoctorNote = ({
   const resetForm = () => {
     setContent("");
     setSummary("");
-    setProviders([]);
+    setProviders(["Dr John"]);
     setProviderInput("");
   };
 

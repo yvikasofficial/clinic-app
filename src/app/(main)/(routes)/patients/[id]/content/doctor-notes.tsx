@@ -83,9 +83,10 @@ const DoctorNotes = ({
         <h3 className="text-lg font-medium text-muted-foreground mb-2">
           No doctor notes found
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mb-4">
           There are no doctor notes recorded for this patient yet.
         </p>
+        <GenerateDoctorNote patient={patient} />
       </div>
     );
   }

@@ -30,6 +30,8 @@ const items = [
     title: "Appointments",
     url: "/appointments",
     icon: Calendar,
+    disabled: true,
+    badge: "Coming Soon",
   },
   {
     title: "Patients",
@@ -40,6 +42,8 @@ const items = [
     title: "Payments",
     url: "/payments",
     icon: CreditCard,
+    disabled: true,
+    badge: "Coming Soon",
   },
 ];
 
@@ -65,7 +69,7 @@ export function AppSidebar() {
                       tooltip={item.disabled ? item.badge : undefined}
                       className={
                         item.disabled
-                          ? "opacity-50 cursor-not-allowed"
+                          ? "opacity-50 !cursor-not-allowed"
                           : isActive && !item.disabled
                           ? "!bg-primary/10 !text-primary hover:!bg-primary/20"
                           : ""

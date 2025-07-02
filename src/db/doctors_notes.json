@@ -128,6 +128,71 @@
       "providerNames": [
         "Dr John"
       ]
+    },
+    {
+      "id": "nt_1751426495156_1cc4dig42",
+      "eventId": "evt_1751426495156_6hh2itwz2",
+      "parentNoteId": "nt_1751426495156_1cc4dig42",
+      "noteTranscriptId": null,
+      "duration": null,
+      "version": 1,
+      "currentVersion": 1,
+      "content": "**Patient Encounter Note**\n\n**Date:** 2022-03-01\n\n**Patient:** Anne Walter, 55 years old, male, born on 1969-10-24, telephone number: 001-114-491-9722\n\n**Chief Complaint:** The patient presents with a persistent headache and elevated blood pressure.\n\n**History of Present Illness:** The patient reports a headache of moderate intensity, localized to the temples, persisting for the past three days. He denies any visual changes, nausea, or vomiting. The headache is not relieved with over-the-counter pain medications. The patient also reports a recent increase in blood pressure readings at home, with a recorded maximum of 170/100 mmHg. He denies any chest pain, shortness of breath, or other cardiovascular symptoms.\n\n**Past Medical History:** The patient has a history of allergies, specifically to shellfish and peanuts. He also has a history of high blood pressure and migraines.\n\n**Allergies:** The patient is allergic to shellfish and peanuts.\n\n**Current Medications:** The patient is currently taking Zyrtec for allergies and Metformin for his blood pressure management.\n\n**Family History:** The patient's family history is significant for hypertension and heart disease.\n\n**Physical Examination (general findings):** Upon examination, the patient's blood pressure was 168/105 mmHg. His pulse was regular at 90 beats per minute, and respirations were 18 per minute. His pupils were equal, round, and reactive to light. No focal neurological deficits were noted. His heart sounded regular with no murmurs or gallops heard. Lungs were clear to auscultation.\n\n**Assessment and Plan:** The patient's presentation is concerning for a possible migraine exacerbation and worsening hypertension. An urgent blood workup, including complete blood count, electrolytes, and lipid panel, is ordered. A referral to a neurologist for further evaluation of his headaches and potential migraine management is recommended. His blood pressure medications should be adjusted as necessary. The patient will be scheduled for a follow-up visit in one week to reassess his condition and adjust his treatment plan as needed. The patient was advised to avoid his allergens and to strictly monitor his blood pressure at home.",
+      "summary": "The patient, Anne Walter, aged 55, presents with a persisting three-day headache and elevated blood pressure (168/105 mmHg). He also reports a recent increase in home blood pressure readings. His history includes allergies to shellfish and peanuts, high blood pressure, and migraines. The physical examination did not reveal any significant abnormalities. The assessment suggests a possible migraine exacerbation and worsening hypertension. The patient is advised to undergo immediate blood work, see a neurologist for further evaluation, and adjust his blood pressure medications. A follow-up appointment is scheduled in one week. The patient should avoid allergens and closely monitor blood pressure at home.",
+      "aiGenerated": true,
+      "template": null,
+      "patient": {
+        "id": "pt_7d4878c87005491eb9de384d",
+        "firstName": "Anne",
+        "lastName": "Walter",
+        "phoneNumber": "001-114-491-9722",
+        "email": "anne.walter@example.com",
+        "address": "59445 Richard Meadow Apt. 337",
+        "addressLineTwo": "Apt 15",
+        "city": "Jessicaview",
+        "state": "ID",
+        "zipCode": "85805",
+        "country": "USA",
+        "dateOfBirth": "1969-10-24",
+        "gender": "MALE"
+      },
+      "createdDate": "2025-07-02T03:21:35.156Z",
+      "providerNames": [
+        "Dr John",
+        "Dr John2"
+      ]
+    },
+    {
+      "id": "nt_1751426568710_4y0tmhojh",
+      "eventId": "evt_1751426568710_kketlsmyv",
+      "parentNoteId": "nt_1751426568710_4y0tmhojh",
+      "noteTranscriptId": null,
+      "duration": null,
+      "version": 1,
+      "currentVersion": 1,
+      "content": "**Doctor's Note**\n\n**Patient:** Anne Walter, DOB: 1969-10-24, Phone: 001-114-491-9722\n\n**1. Chief Complaint:** The patient, Mr. Anne Walter, presents with a recurring and severe headache, associated with photophobia and phonophobia, consistent with a possible migraine episode.\n\n**2. History of Present Illness:** The headache began approximately 24 hours ago and has persisted despite the use of over-the-counter pain relievers. The patient describes the pain as a pulsating, unilateral headache localized on the left side, with a moderate to severe intensity. Nausea and vomiting have also been present. The patient denies any visual disturbances, speech difficulties, or motor weakness.\n\n**3. Past Medical History:** The patient has a history of migraines, high blood pressure, and allergies to shellfish and peanuts.\n\n**4. Allergies:** Known allergies include shellfish and peanuts.\n\n**5. Current Medications:** The patient is currently taking Zyrtec and Metformin.\n\n**6. Family History:** The patient's family history is significant for hypertension and heart disease.\n\n**7. Physical Examination:** General findings reveal a blood pressure of 145/90 mmHg, pulse rate of 78 bpm, and respiratory rate of 16 breaths per minute. On neurological examination, the patient exhibits a mild photophobia and phonophobia, and no focal neurological deficits were noted.\n\n**8. Assessment and Plan:** The patient's symptoms are consistent with a migraine episode. Given the severity and persistence of the headache, I am recommending a prescription migraine medication for acute treatment. I will also adjust the patient's blood pressure management plan as the headache may be a migraine with aura or a complication of hypertension. I will follow up with the patient in one week to assess response to treatment and adjust medication as necessary. The patient should avoid known allergens (shellfish and peanuts) and maintain a regular follow-up schedule for blood pressure monitoring.",
+      "summary": "The doctor's note summarizes that patient Anne Walter, born on October 24, 1969, is experiencing a recurring, severe migraine with associated photophobia and phonophobia that has persisted for 24 hours despite over-the-counter pain relievers. The migraine is localized on the left side and is accompanied by nausea and vomiting. The patient has a history of migraines, high blood pressure, and allergies to shellfish and peanuts. The doctor plans to prescribe a migraine medication for acute treatment, adjust the patient's blood pressure management plan, and follow up in one week to assess response to treatment and adjust medication as necessary. The patient should avoid known allergens (shellfish and peanuts) and maintain regular blood pressure monitoring.",
+      "aiGenerated": true,
+      "template": null,
+      "patient": {
+        "id": "pt_7d4878c87005491eb9de384d",
+        "firstName": "Anne",
+        "lastName": "Walter",
+        "phoneNumber": "001-114-491-9722",
+        "email": "anne.walter@example.com",
+        "address": "59445 Richard Meadow Apt. 337",
+        "addressLineTwo": "Apt 15",
+        "city": "Jessicaview",
+        "state": "ID",
+        "zipCode": "85805",
+        "country": "USA",
+        "dateOfBirth": "1969-10-24",
+        "gender": "MALE"
+      },
+      "createdDate": "2025-07-02T03:22:48.710Z",
+      "providerNames": [
+        "Dr John"
+      ]
     }
   ]
 }
