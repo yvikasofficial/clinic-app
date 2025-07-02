@@ -243,18 +243,20 @@ const Charges = ({
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleCreatePayment}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Create New Payment
-          </Button>
-          <PaymentMethodsManager
-            paymentMethods={paymentMethods as PaymentMethod[]}
-            isLoading={isPaymentMethodsLoading}
-            onPaymentMethodsChange={() => {}}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleCreatePayment}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create New Payment
+            </Button>
+            <PaymentMethodsManager
+              paymentMethods={paymentMethods as PaymentMethod[]}
+              isLoading={isPaymentMethodsLoading}
+              onPaymentMethodsChange={() => {}}
+            />
+          </div>
         </div>
 
         {/* Summary Cards */}

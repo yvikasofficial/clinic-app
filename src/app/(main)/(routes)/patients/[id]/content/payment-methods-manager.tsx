@@ -194,12 +194,53 @@ const PaymentMethodsManager = ({
     );
   };
 
+  const handleSetDefaultPaymentMethod = (methodId: string) => {
+    const updatedMethods = localPaymentMethods.map((method) => ({
+      ...method,
+      isDefault: method.id === methodId,
+    }));
+    setLocalPaymentMethods(updatedMethods);
+    onPaymentMethodsChange?.(updatedMethods);
+    toast.success("Default payment method updated!");
+  };
+
   const renderPaymentMethodsDisplay = () => {
     if (localPaymentMethods.length === 0) {
       return (
         <div className="flex items-center gap-2">
           <Settings className="h-4 w-4" />
           Configure Payment Method
+        </div>
+      );
+    }
+
+    const defaultMethod = localPaymentMethods.find(
+      (method) => method.isDefault
+    );
+
+    if (defaultMethod) {
+      return (
+        <div className="flex items-center gap-2">
+          {getPaymentMethodIcon(defaultMethod)}
+          <span>
+            {defaultMethod.type === PaymentMethodType.CARD
+              ? `${defaultMethod.brand} ••••${defaultMethod.last4}`
+              : `${defaultMethod.bankName} ••••${defaultMethod.accountNumberLast4}`}
+          </span>
+          {defaultMethod.type === PaymentMethodType.CARD && (
+            <Badge variant="secondary" className="ml-1">
+              {defaultMethod.expMonth?.toString().padStart(2, "0")}/
+              {defaultMethod.expYear?.toString().slice(-2)}
+            </Badge>
+          )}
+          <Badge variant="default" className="ml-1">
+            Default
+          </Badge>
+          {localPaymentMethods.length > 1 && (
+            <Badge variant="outline" className="ml-1">
+              +{localPaymentMethods.length - 1} more
+            </Badge>
+          )}
         </div>
       );
     }
@@ -220,11 +261,9 @@ const PaymentMethodsManager = ({
               {method.expYear?.toString().slice(-2)}
             </Badge>
           )}
-          {method.isDefault && (
-            <Badge variant="default" className="ml-1">
-              Default
-            </Badge>
-          )}
+          <Badge variant="outline" className="ml-1 text-orange-600">
+            Set Default
+          </Badge>
         </div>
       );
     }
@@ -233,6 +272,9 @@ const PaymentMethodsManager = ({
       <div className="flex items-center gap-2">
         <CreditCard className="h-4 w-4" />
         <span>{localPaymentMethods.length} Payment Methods</span>
+        <Badge variant="outline" className="ml-1 text-orange-600">
+          Set Default
+        </Badge>
       </div>
     );
   };
@@ -257,6 +299,13 @@ const PaymentMethodsManager = ({
           </DialogTitle>
           <DialogDescription>
             Manage payment methods for processing charges and payments.
+            {!localPaymentMethods.some((method) => method.isDefault) &&
+              localPaymentMethods.length > 0 && (
+                <span className="text-orange-600 font-medium">
+                  {" "}
+                  Select a default payment method.
+                </span>
+              )}
           </DialogDescription>
         </DialogHeader>
 
@@ -281,6 +330,25 @@ const PaymentMethodsManager = ({
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
                     <div className="flex items-center gap-3">
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id={`default-${method.id}`}
+                          name="defaultPaymentMethod"
+                          checked={method.isDefault || false}
+                          onChange={() =>
+                            handleSetDefaultPaymentMethod(method.id)
+                          }
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                        />
+                        <Label
+                          htmlFor={`default-${method.id}`}
+                          className="sr-only"
+                        >
+                          Set as default
+                        </Label>
+                      </div>
+
                       {getPaymentMethodIcon(method)}
                       <div>
                         <div className="font-medium text-sm">
@@ -294,7 +362,11 @@ const PaymentMethodsManager = ({
                                 ?.toString()
                                 .padStart(2, "0")}/${method.expYear}`
                             : `${method.bankName} ••••${method.accountNumberLast4}`}
-                          {method.isDefault && " • Default"}
+                          {method.isDefault && (
+                            <Badge variant="default" className="ml-2">
+                              Default
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -308,6 +380,13 @@ const PaymentMethodsManager = ({
                     </Button>
                   </div>
                 ))}
+
+                {localPaymentMethods.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Select a radio button to set the default payment method for
+                    charges.
+                  </p>
+                )}
               </div>
             )}
           </div>
