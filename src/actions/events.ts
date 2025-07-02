@@ -2,11 +2,10 @@
 
 import { Event } from "@/types/event";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
 
 // JSONBin configuration
-const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
-const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
-const JSONBIN_BASE_URL = "https://api.jsonbin.io/v3";
+const JSONBIN_EVENTS_URL = jsonbin.EVENTS;
 
 // Database structure
 interface Database {
@@ -18,21 +17,17 @@ async function makeJSONBinRequest(
   method: "GET" | "PUT",
   data?: Database
 ): Promise<Database> {
-  if (!JSONBIN_API_KEY || !JSONBIN_BIN_ID) {
-    throw new Error("JSONBin API key and Bin ID must be configured");
+  if (!JSONBIN_EVENTS_URL) {
+    throw new Error("JSONBin Events URL must be configured");
   }
 
-  const url = `${JSONBIN_BASE_URL}/b/${JSONBIN_BIN_ID}`;
-
-  const headers: Record<string, string> = {
-    "X-Master-Key": JSONBIN_API_KEY,
-  };
+  const headers: Record<string, string> = {};
 
   if (method === "PUT") {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(JSONBIN_EVENTS_URL, {
     method,
     headers,
     body: method === "PUT" ? JSON.stringify(data) : undefined,
