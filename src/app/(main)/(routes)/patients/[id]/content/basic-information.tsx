@@ -67,7 +67,7 @@ const BasicInformation = ({ patient }: { patient: Patient }) => {
                 {patient.firstName} {patient.lastName}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs bg-white">
                   <User className="w-3 h-3 mr-1" />
                   {patient.gender.charAt(0) +
                     patient.gender.slice(1).toLowerCase()}

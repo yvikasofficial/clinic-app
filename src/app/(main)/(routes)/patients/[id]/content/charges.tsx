@@ -1,4 +1,4 @@
-import { Charge, ChargeStatus } from "@/types/charge";
+import { Charge, ChargeStatus, PaymentMethod } from "@/types/charge";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, CreditCard } from "lucide-react";
 import clsx from "clsx";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import PaymentMethodsManager from "./payment-methods-manager";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -117,9 +118,13 @@ const PaymentsCellRenderer = ({ data }: { data: Charge }) => {
 const Charges = ({
   charges,
   isLoading,
+  paymentMethods,
+  isPaymentMethodsLoading,
 }: {
   charges: Charge[];
   isLoading: boolean;
+  paymentMethods: PaymentMethod[];
+  isPaymentMethodsLoading: boolean;
 }) => {
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
@@ -244,6 +249,11 @@ const Charges = ({
             <Plus className="h-4 w-4" />
             Create New Payment
           </Button>
+          <PaymentMethodsManager
+            paymentMethods={paymentMethods}
+            isLoading={isPaymentMethodsLoading}
+            onPaymentMethodsChange={() => {}}
+          />
         </div>
 
         {/* Summary Cards */}

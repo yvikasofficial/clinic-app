@@ -28,11 +28,12 @@ import DoctorNotes from "./content/doctor-notes";
 import { DoctorNote } from "@/types/doctorNote";
 import { useGetDoctorNotesByPatientId } from "@/services/doctorNotes/use-get-doctor-notes-by-patient-id";
 import { useGetChargesByPatientId } from "@/services/charges/use-get-charges-by-patient-id";
-import { Charge } from "@/types/charge";
+import { Charge, PaymentMethod } from "@/types/charge";
 import Charges from "./content/charges";
 import { useGetAlertsByPatientId } from "@/services/alerts/use-get-alerts-by-patient-id";
 import Alerts from "./content/alerts";
 import { Alert } from "@/types/alert";
+import { useGetPaymentMethodsByPatientId } from "@/services/paymentMethods/use-get-payment-methods-by-patient-id";
 
 const PatientPage = () => {
   const { id } = useParams();
@@ -51,6 +52,8 @@ const PatientPage = () => {
   const { data: alerts, isLoading: alertsLoading } = useGetAlertsByPatientId(
     id as string
   );
+  const { data: paymentMethods, isLoading: paymentMethodsLoading } =
+    useGetPaymentMethodsByPatientId(id as string);
 
   const [activeTab, setActiveTab] = useState("medical");
 
@@ -106,7 +109,12 @@ const PatientPage = () => {
       value: "charges",
       icon: <CreditCard />,
       component: (
-        <Charges charges={charges as Charge[]} isLoading={chargesLoading} />
+        <Charges
+          charges={charges as Charge[]}
+          isLoading={chargesLoading}
+          paymentMethods={paymentMethods as PaymentMethod[]}
+          isPaymentMethodsLoading={paymentMethodsLoading}
+        />
       ),
     },
   ];
