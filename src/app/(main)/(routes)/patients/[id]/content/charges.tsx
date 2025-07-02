@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Charge, ChargeStatus } from "@/types/charge";
 import { ColDef } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
@@ -129,6 +130,14 @@ const Charges = ({
 }) => {
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
+    if (!charges)
+      return {
+        totalCharges: 0,
+        totalAmount: 0,
+        totalOutstanding: 0,
+        totalPaid: 0,
+        statusCounts: {},
+      } as any;
     const totalCharges = charges.length;
     const totalAmount = charges.reduce((sum, charge) => sum + charge.total, 0);
     const totalOutstanding = charges.reduce(
@@ -229,6 +238,8 @@ const Charges = ({
     }),
     []
   );
+
+  if (isLoading || isPaymentMethodsLoading) return <div>Loading...</div>;
 
   return (
     <div className="w-full space-y-6">

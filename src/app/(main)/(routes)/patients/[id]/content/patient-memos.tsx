@@ -1,3 +1,4 @@
+import { Patient } from "@/types/patient";
 import { Memo } from "@/types/memo";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,11 @@ import CreateMemoModal from "./create-memo-modal";
 const PatientMemos = ({
   memos,
   isLoading,
+  patient,
 }: {
   memos: Memo[];
   isLoading: boolean;
+  patient: Patient;
 }) => {
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
 
@@ -26,9 +29,18 @@ const PatientMemos = ({
         <h3 className="text-lg font-medium text-muted-foreground mb-2">
           No memos found
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mb-4">
           There are no memos recorded for this patient yet.
         </p>
+        <Button onClick={() => setIsCreateMemoModalOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Create New Memo
+        </Button>
+        <CreateMemoModal
+          isOpen={isCreateMemoModalOpen}
+          onClose={() => setIsCreateMemoModalOpen(false)}
+          patient={patient}
+        />
       </div>
     );
   }

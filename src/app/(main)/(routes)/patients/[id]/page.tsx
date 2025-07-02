@@ -38,6 +38,7 @@ import { PaymentMethod } from "@/types/paymentMethods";
 
 const PatientPage = () => {
   const { id } = useParams();
+  console.log("Patient ID", id);
   const { data: patient, isLoading, error } = useGetPatient(id as string);
   const { data: events, isLoading: eventsLoading } = useGetEventByPatientId(
     id as string
@@ -90,7 +91,11 @@ const PatientPage = () => {
       value: "memos",
       icon: <FileText />,
       component: (
-        <PatientMemos memos={memos as Memo[]} isLoading={memosLoading} />
+        <PatientMemos
+          memos={memos as Memo[]}
+          isLoading={memosLoading}
+          patient={patient as Patient}
+        />
       ),
     },
     {

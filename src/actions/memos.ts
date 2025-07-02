@@ -28,6 +28,7 @@ async function getData(): Promise<Database> {
 async function saveData(data: Database): Promise<void> {
   try {
     await makeJSONBinRequest(MEMOS_BIN_URL, "PUT", data);
+    console.log("Memos saved successfully", data);
   } catch (error) {
     console.error("Failed to save data to JSONBin:", error);
     throw new Error("Failed to save data");
@@ -188,7 +189,11 @@ export async function getMemosByPatientId(patientId: string): Promise<Memo[]> {
     }
 
     const data = await getData();
-    return data.memos.filter((m) => m.patient.id === patientId) || [];
+    return (
+      data.memos.filter((m) => {
+        return m.patient.id === patientId;
+      }) || []
+    );
   } catch (error) {
     console.error("Failed to get memos by patient ID:", error);
     throw new Error("Failed to retrieve patient memos");

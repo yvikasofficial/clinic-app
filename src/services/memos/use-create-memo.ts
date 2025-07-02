@@ -38,6 +38,8 @@ export function useCreateMemo() {
         updatedDate: now,
       };
 
+      console.log("New memo", data.patient?.id);
+
       // Log the exact JSON output for verification
       console.log(
         "Creating memo with exact JSON structure:",
@@ -45,6 +47,7 @@ export function useCreateMemo() {
       );
 
       await addMemo(newMemo);
+      console.log("Memo created successfully");
       return newMemo;
     },
     onSuccess: (data) => {
