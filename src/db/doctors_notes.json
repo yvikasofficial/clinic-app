@@ -28,7 +28,10 @@
         "gender": "FEMALE"
       },
       "createdDate": "2023-08-20T14:45:00.000Z",
-      "providerNames": ["Dr. Robert Davis", "Dr. Emily Chen"]
+      "providerNames": [
+        "Dr. Robert Davis",
+        "Dr. Emily Chen"
+      ]
     },
     {
       "id": "nt_2b3c4d5e6f7g8h9i0j",
@@ -58,7 +61,9 @@
         "gender": "FEMALE"
       },
       "createdDate": "2023-05-10T09:30:00.000Z",
-      "providerNames": ["Dr. Robert Davis"]
+      "providerNames": [
+        "Dr. Robert Davis"
+      ]
     },
     {
       "id": "nt_3c4d5e6f7g8h9i0j1k",
@@ -88,7 +93,41 @@
         "gender": "FEMALE"
       },
       "createdDate": "2023-03-15T10:45:00.000Z",
-      "providerNames": ["Dr. Emily Chen"]
+      "providerNames": [
+        "Dr. Emily Chen"
+      ]
+    },
+    {
+      "id": "nt_1751422769597_xoqmdcqbx",
+      "eventId": "evt_1751422769597_wvld6ll5d",
+      "parentNoteId": "nt_1751422769597_xoqmdcqbx",
+      "noteTranscriptId": null,
+      "duration": null,
+      "version": 1,
+      "currentVersion": 1,
+      "content": "**Patient Encounter Note**\n\n**Patient:** Amber Mendez, DOB: 1957-05-06\n**Age:** 68 years\n**Gender:** Male\n**Phone:** 751-508-4946x0518\n\n**1. Chief Complaint:**\nThe patient presented to the clinic today for a routine check-up and medication refill. No acute symptoms were reported.\n\n**2. History of Present Illness:**\nThe patient denies any acute or chronic symptoms. He reports no recent falls, injuries, or illnesses. He is adherent to his medication regimen and denies any side effects.\n\n**3. Past Medical History:**\nAmber Mendez has a history of asthma, which is well-controlled with regular inhaler use. He also has a diagnosis of hypertension, for which he is currently managed with Metformin.\n\n**4. Allergies:**\nThe patient has allergies to latex and peanuts.\n\n**5. Current Medications:**\nAmber Mendez is currently taking Zyrtec daily for allergies and Metformin for hypertension.\n\n**6. Family History:**\nAmber Mendez's family history is significant for hypertension and cancer.\n\n**7. Physical Examination:**\nGeneral findings: Amber Mendez appears to be in no acute distress. Height: 65 inches, Weight: 180 lbs, BMI: 27.6. Blood pressure: 140/90 mmHg. Pulse: 80 bpm, Respirations: 16 bpm. Lungs are clear to auscultation, heart sounds are regular, and abdomen is soft and non-tender.\n\n**8. Assessment and Plan:**\nAmber Mendez is a 68-year-old male with a history of asthma, hypertension, and allergies to latex and peanuts. He is currently adherent to his medication regimen and is in overall stable condition. Blood pressure remains elevated, and I recommend close monitoring and potential adjustment of the current antihypertensive therapy. A routine follow-up appointment is scheduled for four weeks to assess blood pressure control and medication adherence. The patient was educated on the importance of regular exercise, a balanced diet, and avoidance of triggers for his asthma. A referral to a nurse educator for medication management and lifestyle modifications was made.",
+      "summary": "Amber Mendez, a 68-year-old male, visited the clinic for a routine check-up and medication refill. He has a history of asthma, well-controlled with regular inhaler use, and hypertension managed with Metformin. He has allergies to latex and peanuts. His current medications are Zyrtec for allergies and Metformin for hypertension. He is in stable condition but has elevated blood pressure, which requires close monitoring and potential adjustment of the current antihypertensive therapy. A follow-up appointment is scheduled for four weeks to assess blood pressure control and medication adherence. The patient was also educated on lifestyle modifications for asthma management and referred to a nurse educator for medication management.",
+      "aiGenerated": true,
+      "template": null,
+      "patient": {
+        "id": "pt_caa017201f8b4ed9a013c869",
+        "firstName": "Amber",
+        "lastName": "Mendez",
+        "phoneNumber": "751-508-4946x0518",
+        "email": "amber.mendez@example.com",
+        "address": "53573 Andrew Squares Apt. 156",
+        "addressLineTwo": "Apt 8",
+        "city": "North Amandaside",
+        "state": "AK",
+        "zipCode": "77704",
+        "country": "USA",
+        "dateOfBirth": "1957-05-06",
+        "gender": "MALE"
+      },
+      "createdDate": "2025-07-02T02:19:29.597Z",
+      "providerNames": [
+        "Dr John"
+      ]
     }
   ]
 }

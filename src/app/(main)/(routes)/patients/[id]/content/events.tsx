@@ -90,19 +90,6 @@ const Events = ({
     }
   };
 
-  const getAppointmentTypeColor = (type: AppointmentType) => {
-    switch (type) {
-      case AppointmentType.URGENT_CARE:
-        return "destructive";
-      case AppointmentType.NEW_PATIENT:
-        return "default";
-      case AppointmentType.FOLLOW_UP:
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -175,9 +162,12 @@ const Events = ({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Badge
-                        variant={getAppointmentTypeColor(
-                          event.appointment.appointmentType
-                        )}
+                        variant={
+                          event.appointment.appointmentType ===
+                          AppointmentType.URGENT_CARE
+                            ? "destructive"
+                            : "default"
+                        }
                       >
                         {event.appointment.appointmentType.replace("_", " ")}
                       </Badge>

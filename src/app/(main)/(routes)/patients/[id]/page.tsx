@@ -97,6 +97,7 @@ const PatientPage = () => {
         <DoctorNotes
           doctorNotes={doctorNotes as DoctorNote[]}
           isLoading={doctorNotesLoading}
+          patient={patient as Patient}
         />
       ),
     },

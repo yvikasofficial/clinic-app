@@ -19,13 +19,17 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
+import { Patient } from "@/types/patient";
+import GenerateDoctorNote from "./generate-doctor-note";
 
 const DoctorNotes = ({
   doctorNotes,
   isLoading,
+  patient,
 }: {
   doctorNotes: DoctorNote[];
   isLoading: boolean;
+  patient: Patient;
 }) => {
   // Loading state
   if (isLoading) {
@@ -135,10 +139,7 @@ const DoctorNotes = ({
               </p>
             </div>
           </div>
-          <Button onClick={handleGenerateNewNote} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Generate New Note
-          </Button>
+          <GenerateDoctorNote patient={patient} />
         </div>
 
         {/* Statistics */}
