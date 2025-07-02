@@ -1,44 +1,55 @@
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { DoctorNote } from "@/types/doctorNote";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   doctor_notes: DoctorNote[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "doctors_notes.json");
+// JSONBin API configuration
+const DOCTOR_NOTES_BIN_URL = jsonbin.DOCTOR_NOTES;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { doctor_notes: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(DOCTOR_NOTES_BIN_URL, "GET");
+    return response.record || { doctor_notes: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { doctor_notes: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(DOCTOR_NOTES_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initDoctorNotesDB() {
   try {
-    await db.read();
-
-    // Initialize with empty doctor_notes array if file doesn't exist
-    if (!db.data) {
-      db.data = { doctor_notes: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize doctor notes database:", error);
-    throw new Error("Doctor notes database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all doctor notes
 export async function getDoctorNotes(): Promise<DoctorNote[]> {
   try {
-    await db.read();
-    return db.data?.doctor_notes || [];
+    const data = await getData();
+    return data.doctor_notes || [];
   } catch (error) {
     console.error("Failed to get doctor notes:", error);
     throw new Error("Failed to retrieve doctor notes");
@@ -54,10 +65,9 @@ export async function getDoctorNotesByPatientId(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.doctor_notes.filter((note) => note.patient.id === patientId) ||
-      []
+      data.doctor_notes.filter((note) => note.patient.id === patientId) || []
     );
   } catch (error) {
     console.error("Failed to get doctor notes by patient ID:", error);
@@ -70,11 +80,7 @@ export async function addDoctorNote(
   doctorNote: DoctorNote
 ): Promise<DoctorNote> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { doctor_notes: [] };
-    }
+    const data = await getData();
 
     // Validate required fields
     if (!doctorNote.id || !doctorNote.content || !doctorNote.patient?.id) {
@@ -82,15 +88,15 @@ export async function addDoctorNote(
     }
 
     // Check if doctor note already exists
-    const existingNote = db.data.doctor_notes.find(
+    const existingNote = data.doctor_notes.find(
       (note) => note.id === doctorNote.id
     );
     if (existingNote) {
       throw new Error("Doctor note with this ID already exists");
     }
 
-    db.data.doctor_notes.push(doctorNote);
-    await db.write();
+    data.doctor_notes.push(doctorNote);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/doctor-notes");
@@ -115,34 +121,27 @@ export async function updateDoctorNote(
       throw new Error("Doctor note ID is required");
     }
 
-    await db.read();
-    const noteIndex =
-      db.data?.doctor_notes.findIndex((note) => note.id === id) ?? -1;
+    const data = await getData();
+    const noteIndex = data.doctor_notes.findIndex((note) => note.id === id);
 
     if (noteIndex === -1) {
       throw new Error("Doctor note not found");
     }
 
-    if (db.data?.doctor_notes[noteIndex]) {
-      db.data.doctor_notes[noteIndex] = {
-        ...db.data.doctor_notes[noteIndex],
-        ...updates,
-      };
-      await db.write();
+    data.doctor_notes[noteIndex] = {
+      ...data.doctor_notes[noteIndex],
+      ...updates,
+    };
+    await saveData(data);
 
-      // Revalidate relevant pages
-      revalidatePath("/doctor-notes");
-      revalidatePath(`/doctor-notes/${id}`);
-      if (db.data.doctor_notes[noteIndex].patient?.id) {
-        revalidatePath(
-          `/patients/${db.data.doctor_notes[noteIndex].patient.id}`
-        );
-      }
-
-      return db.data.doctor_notes[noteIndex];
+    // Revalidate relevant pages
+    revalidatePath("/doctor-notes");
+    revalidatePath(`/doctor-notes/${id}`);
+    if (data.doctor_notes[noteIndex].patient?.id) {
+      revalidatePath(`/patients/${data.doctor_notes[noteIndex].patient.id}`);
     }
 
-    return null;
+    return data.doctor_notes[noteIndex];
   } catch (error) {
     console.error("Failed to update doctor note:", error);
     throw new Error(
@@ -158,30 +157,25 @@ export async function deleteDoctorNote(id: string): Promise<boolean> {
       throw new Error("Doctor note ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.doctor_notes.length || 0;
+    const data = await getData();
+    const initialLength = data.doctor_notes.length;
+    const noteToDelete = data.doctor_notes.find((note) => note.id === id);
 
-    if (db.data?.doctor_notes) {
-      const noteToDelete = db.data.doctor_notes.find((note) => note.id === id);
-      db.data.doctor_notes = db.data.doctor_notes.filter(
-        (note) => note.id !== id
-      );
-      await db.write();
+    data.doctor_notes = data.doctor_notes.filter((note) => note.id !== id);
 
-      const deleted = db.data.doctor_notes.length < initialLength;
+    const deleted = data.doctor_notes.length < initialLength;
 
-      if (deleted) {
-        // Revalidate relevant pages
-        revalidatePath("/doctor-notes");
-        if (noteToDelete?.patient?.id) {
-          revalidatePath(`/patients/${noteToDelete.patient.id}`);
-        }
+    if (deleted) {
+      await saveData(data);
+
+      // Revalidate relevant pages
+      revalidatePath("/doctor-notes");
+      if (noteToDelete?.patient?.id) {
+        revalidatePath(`/patients/${noteToDelete.patient.id}`);
       }
-
-      return deleted;
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete doctor note:", error);
     throw new Error("Failed to delete doctor note");
@@ -197,8 +191,8 @@ export async function getDoctorNoteById(
       throw new Error("Doctor note ID is required");
     }
 
-    await db.read();
-    return db.data?.doctor_notes.find((note) => note.id === id) || null;
+    const data = await getData();
+    return data.doctor_notes.find((note) => note.id === id) || null;
   } catch (error) {
     console.error("Failed to get doctor note by ID:", error);
     throw new Error("Failed to retrieve doctor note");
@@ -214,10 +208,8 @@ export async function getDoctorNotesByEventId(
       throw new Error("Event ID is required");
     }
 
-    await db.read();
-    return (
-      db.data?.doctor_notes.filter((note) => note.eventId === eventId) || []
-    );
+    const data = await getData();
+    return data.doctor_notes.filter((note) => note.eventId === eventId) || [];
   } catch (error) {
     console.error("Failed to get doctor notes by event ID:", error);
     throw new Error("Failed to retrieve doctor notes");
@@ -233,9 +225,9 @@ export async function getDoctorNotesByProvider(
       throw new Error("Provider name is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.doctor_notes.filter((note) =>
+      data.doctor_notes.filter((note) =>
         note.providerNames.includes(providerName)
       ) || []
     );

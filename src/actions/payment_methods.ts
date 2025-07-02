@@ -1,44 +1,55 @@
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
-import { revalidatePath } from "next/cache";
 import { PaymentMethod } from "@/types/paymentMethods";
+import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   payment_methods: PaymentMethod[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "payment_methods.json");
+// JSONBin API configuration
+const PAYMENT_METHODS_BIN_URL = jsonbin.PAYMENT_METHODS;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { payment_methods: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(PAYMENT_METHODS_BIN_URL, "GET");
+    return response.record || { payment_methods: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { payment_methods: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(PAYMENT_METHODS_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initPaymentMethodsDB() {
   try {
-    await db.read();
-
-    // Initialize with empty payment_methods array if file doesn't exist
-    if (!db.data) {
-      db.data = { payment_methods: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize payment methods database:", error);
-    throw new Error("Payment methods database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all payment methods
 export async function getPaymentMethods(): Promise<PaymentMethod[]> {
   try {
-    await db.read();
-    return db.data?.payment_methods || [];
+    const data = await getData();
+    return data.payment_methods || [];
   } catch (error) {
     console.error("Failed to get payment methods:", error);
     throw new Error("Failed to retrieve payment methods");
@@ -54,9 +65,9 @@ export async function getPaymentMethodsByPatientId(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.payment_methods.filter((pm) => pm.patientId === patientId) || []
+      data.payment_methods.filter((pm) => pm.patientId === patientId) || []
     );
   } catch (error) {
     console.error("Failed to get payment methods by patient ID:", error);
@@ -69,11 +80,7 @@ export async function addPaymentMethod(
   paymentMethod: PaymentMethod
 ): Promise<PaymentMethod> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { payment_methods: [] };
-    }
+    const data = await getData();
 
     // Validate required fields
     if (
@@ -86,7 +93,7 @@ export async function addPaymentMethod(
     }
 
     // Check if payment method already exists
-    const existingPaymentMethod = db.data.payment_methods.find(
+    const existingPaymentMethod = data.payment_methods.find(
       (pm) => pm.id === paymentMethod.id
     );
     if (existingPaymentMethod) {
@@ -95,15 +102,15 @@ export async function addPaymentMethod(
 
     // If this is set as default, unset other default payment methods for this patient
     if (paymentMethod.isDefault) {
-      db.data.payment_methods = db.data.payment_methods.map((pm) =>
+      data.payment_methods = data.payment_methods.map((pm) =>
         pm.patientId === paymentMethod.patientId
           ? { ...pm, isDefault: false }
           : pm
       );
     }
 
-    db.data.payment_methods.push(paymentMethod);
-    await db.write();
+    data.payment_methods.push(paymentMethod);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/payments");
@@ -129,41 +136,39 @@ export async function updatePaymentMethod(
       throw new Error("Payment method ID is required");
     }
 
-    await db.read();
-    const paymentMethodIndex =
-      db.data?.payment_methods.findIndex((pm) => pm.id === id) ?? -1;
+    const data = await getData();
+    const paymentMethodIndex = data.payment_methods.findIndex(
+      (pm) => pm.id === id
+    );
 
     if (paymentMethodIndex === -1) {
       throw new Error("Payment method not found");
     }
 
-    if (db.data?.payment_methods[paymentMethodIndex]) {
-      const currentPaymentMethod = db.data.payment_methods[paymentMethodIndex];
+    const currentPaymentMethod = data.payment_methods[paymentMethodIndex];
 
-      // If updating to default, unset other default payment methods for this patient
-      if (updates.isDefault === true) {
-        db.data.payment_methods = db.data.payment_methods.map((pm) =>
-          pm.patientId === currentPaymentMethod.patientId && pm.id !== id
-            ? { ...pm, isDefault: false }
-            : pm
-        );
-      }
-
-      db.data.payment_methods[paymentMethodIndex] = {
-        ...currentPaymentMethod,
-        ...updates,
-      };
-      await db.write();
-
-      // Revalidate relevant pages
-      revalidatePath("/payments");
-      revalidatePath("/payment-methods");
-      revalidatePath(`/patients/${currentPaymentMethod.patientId}`);
-
-      return db.data.payment_methods[paymentMethodIndex];
+    // If updating to default, unset other default payment methods for this patient
+    if (updates.isDefault === true) {
+      data.payment_methods = data.payment_methods.map((pm) =>
+        pm.patientId === currentPaymentMethod.patientId && pm.id !== id
+          ? { ...pm, isDefault: false }
+          : pm
+      );
     }
 
-    return null;
+    data.payment_methods[paymentMethodIndex] = {
+      ...currentPaymentMethod,
+      ...updates,
+    };
+
+    await saveData(data);
+
+    // Revalidate relevant pages
+    revalidatePath("/payments");
+    revalidatePath("/payment-methods");
+    revalidatePath(`/patients/${currentPaymentMethod.patientId}`);
+
+    return data.payment_methods[paymentMethodIndex];
   } catch (error) {
     console.error("Failed to update payment method:", error);
     throw new Error(
@@ -179,31 +184,28 @@ export async function deletePaymentMethod(id: string): Promise<boolean> {
       throw new Error("Payment method ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.payment_methods.length || 0;
-    const paymentMethodToDelete = db.data?.payment_methods.find(
+    const data = await getData();
+    const initialLength = data.payment_methods.length;
+    const paymentMethodToDelete = data.payment_methods.find(
       (pm) => pm.id === id
     );
 
-    if (db.data?.payment_methods) {
-      db.data.payment_methods = db.data.payment_methods.filter(
-        (pm) => pm.id !== id
-      );
-      await db.write();
+    data.payment_methods = data.payment_methods.filter((pm) => pm.id !== id);
 
-      const deleted = db.data.payment_methods.length < initialLength;
+    const deleted = data.payment_methods.length < initialLength;
 
-      if (deleted && paymentMethodToDelete) {
+    if (deleted) {
+      await saveData(data);
+
+      if (paymentMethodToDelete) {
         // Revalidate relevant pages
         revalidatePath("/payments");
         revalidatePath("/payment-methods");
         revalidatePath(`/patients/${paymentMethodToDelete.patientId}`);
       }
-
-      return deleted;
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete payment method:", error);
     throw new Error("Failed to delete payment method");
@@ -219,8 +221,8 @@ export async function getPaymentMethodById(
       throw new Error("Payment method ID is required");
     }
 
-    await db.read();
-    return db.data?.payment_methods.find((pm) => pm.id === id) || null;
+    const data = await getData();
+    return data.payment_methods.find((pm) => pm.id === id) || null;
   } catch (error) {
     console.error("Failed to get payment method by ID:", error);
     throw new Error("Failed to retrieve payment method");
@@ -236,9 +238,9 @@ export async function getDefaultPaymentMethod(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.payment_methods.find(
+      data.payment_methods.find(
         (pm) => pm.patientId === patientId && pm.isDefault
       ) || null
     );
@@ -248,7 +250,7 @@ export async function getDefaultPaymentMethod(
   }
 }
 
-// Set a payment method as default for a patient
+// Set a payment method as default
 export async function setDefaultPaymentMethod(
   id: string
 ): Promise<PaymentMethod | null> {
@@ -257,33 +259,51 @@ export async function setDefaultPaymentMethod(
       throw new Error("Payment method ID is required");
     }
 
-    await db.read();
-    const paymentMethod = db.data?.payment_methods.find((pm) => pm.id === id);
+    const data = await getData();
+    const paymentMethodIndex = data.payment_methods.findIndex(
+      (pm) => pm.id === id
+    );
 
-    if (!paymentMethod) {
+    if (paymentMethodIndex === -1) {
       throw new Error("Payment method not found");
     }
 
-    // Unset all default payment methods for this patient
-    if (db.data?.payment_methods) {
-      db.data.payment_methods = db.data.payment_methods.map((pm) =>
-        pm.patientId === paymentMethod.patientId
-          ? { ...pm, isDefault: pm.id === id }
-          : pm
-      );
-      await db.write();
+    const currentPaymentMethod = data.payment_methods[paymentMethodIndex];
 
-      // Revalidate relevant pages
-      revalidatePath("/payments");
-      revalidatePath("/payment-methods");
-      revalidatePath(`/patients/${paymentMethod.patientId}`);
+    // Unset other default payment methods for this patient
+    data.payment_methods = data.payment_methods.map((pm) =>
+      pm.patientId === currentPaymentMethod.patientId
+        ? { ...pm, isDefault: pm.id === id }
+        : pm
+    );
 
-      return db.data.payment_methods.find((pm) => pm.id === id) || null;
-    }
+    await saveData(data);
 
-    return null;
+    // Revalidate relevant pages
+    revalidatePath("/payments");
+    revalidatePath("/payment-methods");
+    revalidatePath(`/patients/${currentPaymentMethod.patientId}`);
+
+    return data.payment_methods[paymentMethodIndex];
   } catch (error) {
     console.error("Failed to set default payment method:", error);
     throw new Error("Failed to set default payment method");
+  }
+}
+
+// Get payment methods by type
+export async function getPaymentMethodsByType(
+  type: string
+): Promise<PaymentMethod[]> {
+  try {
+    if (!type) {
+      throw new Error("Payment method type is required");
+    }
+
+    const data = await getData();
+    return data.payment_methods.filter((pm) => pm.type === type) || [];
+  } catch (error) {
+    console.error("Failed to get payment methods by type:", error);
+    throw new Error("Failed to retrieve payment methods by type");
   }
 }

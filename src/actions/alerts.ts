@@ -1,44 +1,55 @@
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { Alert, AlertType } from "@/types/alert";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   alerts: Alert[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "alerts.json");
+// JSONBin API configuration
+const ALERTS_BIN_URL = jsonbin.ALERTS;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { alerts: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(ALERTS_BIN_URL, "GET");
+    return response.record || { alerts: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { alerts: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(ALERTS_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initAlertsDB() {
   try {
-    await db.read();
-
-    // Initialize with empty alerts array if file doesn't exist
-    if (!db.data) {
-      db.data = { alerts: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize alerts database:", error);
-    throw new Error("Alerts database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all alerts
 export async function getAlerts(): Promise<Alert[]> {
   try {
-    await db.read();
-    return db.data?.alerts || [];
+    const data = await getData();
+    return data.alerts || [];
   } catch (error) {
     console.error("Failed to get alerts:", error);
     throw new Error("Failed to retrieve alerts");
@@ -54,10 +65,8 @@ export async function getAlertsByPatientId(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
-    return (
-      db.data?.alerts.filter((alert) => alert.patient.id === patientId) || []
-    );
+    const data = await getData();
+    return data.alerts.filter((alert) => alert.patient.id === patientId) || [];
   } catch (error) {
     console.error("Failed to get alerts by patient ID:", error);
     throw new Error("Failed to retrieve alerts");
@@ -67,11 +76,7 @@ export async function getAlertsByPatientId(
 // Add a new alert
 export async function addAlert(alert: Alert): Promise<Alert> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { alerts: [] };
-    }
+    const data = await getData();
 
     // Validate required fields
     if (!alert.id || !alert.type || !alert.patient?.id) {
@@ -79,15 +84,15 @@ export async function addAlert(alert: Alert): Promise<Alert> {
     }
 
     // Check if alert already exists
-    const existingAlert = db.data.alerts.find(
+    const existingAlert = data.alerts.find(
       (existingAlert) => existingAlert.id === alert.id
     );
     if (existingAlert) {
       throw new Error("Alert with this ID already exists");
     }
 
-    db.data.alerts.push(alert);
-    await db.write();
+    data.alerts.push(alert);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/alerts");
@@ -112,32 +117,27 @@ export async function updateAlert(
       throw new Error("Alert ID is required");
     }
 
-    await db.read();
-    const alertIndex =
-      db.data?.alerts.findIndex((alert) => alert.id === id) ?? -1;
+    const data = await getData();
+    const alertIndex = data.alerts.findIndex((alert) => alert.id === id);
 
     if (alertIndex === -1) {
       throw new Error("Alert not found");
     }
 
-    if (db.data?.alerts[alertIndex]) {
-      db.data.alerts[alertIndex] = {
-        ...db.data.alerts[alertIndex],
-        ...updates,
-      };
-      await db.write();
+    data.alerts[alertIndex] = {
+      ...data.alerts[alertIndex],
+      ...updates,
+    };
+    await saveData(data);
 
-      // Revalidate relevant pages
-      revalidatePath("/alerts");
-      revalidatePath(`/alerts/${id}`);
-      if (db.data.alerts[alertIndex].patient?.id) {
-        revalidatePath(`/patients/${db.data.alerts[alertIndex].patient.id}`);
-      }
-
-      return db.data.alerts[alertIndex];
+    // Revalidate relevant pages
+    revalidatePath("/alerts");
+    revalidatePath(`/alerts/${id}`);
+    if (data.alerts[alertIndex].patient?.id) {
+      revalidatePath(`/patients/${data.alerts[alertIndex].patient.id}`);
     }
 
-    return null;
+    return data.alerts[alertIndex];
   } catch (error) {
     console.error("Failed to update alert:", error);
     throw new Error(
@@ -153,28 +153,24 @@ export async function deleteAlert(id: string): Promise<boolean> {
       throw new Error("Alert ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.alerts.length || 0;
+    const data = await getData();
+    const initialLength = data.alerts.length;
+    const alertToDelete = data.alerts.find((alert) => alert.id === id);
 
-    if (db.data?.alerts) {
-      const alertToDelete = db.data.alerts.find((alert) => alert.id === id);
-      db.data.alerts = db.data.alerts.filter((alert) => alert.id !== id);
-      await db.write();
+    data.alerts = data.alerts.filter((alert) => alert.id !== id);
+    const deleted = data.alerts.length < initialLength;
 
-      const deleted = db.data.alerts.length < initialLength;
+    if (deleted) {
+      await saveData(data);
 
-      if (deleted) {
-        // Revalidate relevant pages
-        revalidatePath("/alerts");
-        if (alertToDelete?.patient?.id) {
-          revalidatePath(`/patients/${alertToDelete.patient.id}`);
-        }
+      // Revalidate relevant pages
+      revalidatePath("/alerts");
+      if (alertToDelete?.patient?.id) {
+        revalidatePath(`/patients/${alertToDelete.patient.id}`);
       }
-
-      return deleted;
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete alert:", error);
     throw new Error("Failed to delete alert");
@@ -188,8 +184,8 @@ export async function getAlertById(id: string): Promise<Alert | null> {
       throw new Error("Alert ID is required");
     }
 
-    await db.read();
-    return db.data?.alerts.find((alert) => alert.id === id) || null;
+    const data = await getData();
+    return data.alerts.find((alert) => alert.id === id) || null;
   } catch (error) {
     console.error("Failed to get alert by ID:", error);
     throw new Error("Failed to retrieve alert");
@@ -203,8 +199,8 @@ export async function getAlertsByType(type: AlertType): Promise<Alert[]> {
       throw new Error("Alert type is required");
     }
 
-    await db.read();
-    return db.data?.alerts.filter((alert) => alert.type === type) || [];
+    const data = await getData();
+    return data.alerts.filter((alert) => alert.type === type) || [];
   } catch (error) {
     console.error("Failed to get alerts by type:", error);
     throw new Error("Failed to retrieve alerts");
@@ -214,9 +210,9 @@ export async function getAlertsByType(type: AlertType): Promise<Alert[]> {
 // Get alerts requiring action
 export async function getAlertsRequiringAction(): Promise<Alert[]> {
   try {
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.alerts.filter(
+      data.alerts.filter(
         (alert) => alert.actionRequired && !alert.resolvedDate
       ) || []
     );
@@ -229,8 +225,8 @@ export async function getAlertsRequiringAction(): Promise<Alert[]> {
 // Get resolved alerts
 export async function getResolvedAlerts(): Promise<Alert[]> {
   try {
-    await db.read();
-    return db.data?.alerts.filter((alert) => alert.resolvedDate !== null) || [];
+    const data = await getData();
+    return data.alerts.filter((alert) => alert.resolvedDate !== null) || [];
   } catch (error) {
     console.error("Failed to get resolved alerts:", error);
     throw new Error("Failed to retrieve resolved alerts");
@@ -246,11 +242,10 @@ export async function getAlertsByAssignedProvider(
       throw new Error("Provider ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.alerts.filter(
-        (alert) => alert.assignedProvider.id === providerId
-      ) || []
+      data.alerts.filter((alert) => alert.assignedProvider.id === providerId) ||
+      []
     );
   } catch (error) {
     console.error("Failed to get alerts by assigned provider:", error);
@@ -265,9 +260,9 @@ export async function getAlertsByTag(tagName: string): Promise<Alert[]> {
       throw new Error("Tag name is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.alerts.filter((alert) =>
+      data.alerts.filter((alert) =>
         alert.tags.some((tag) => tag.name === tagName)
       ) || []
     );
@@ -287,38 +282,33 @@ export async function resolveAlert(
       throw new Error("Alert ID and resolving provider ID are required");
     }
 
-    await db.read();
-    const alertIndex =
-      db.data?.alerts.findIndex((alert) => alert.id === id) ?? -1;
+    const data = await getData();
+    const alertIndex = data.alerts.findIndex((alert) => alert.id === id);
 
     if (alertIndex === -1) {
       throw new Error("Alert not found");
     }
 
-    if (db.data?.alerts[alertIndex]) {
-      // Find the resolving provider from the existing providers or use assigned provider structure
-      const resolvingProvider =
-        db.data.alerts[alertIndex].assignedProvider.id === resolvingProviderId
-          ? db.data.alerts[alertIndex].assignedProvider
-          : db.data.alerts[alertIndex].assignedProvider; // In a real app, you'd fetch the provider by ID
+    // Find the resolving provider from the existing providers or use assigned provider structure
+    const resolvingProvider =
+      data.alerts[alertIndex].assignedProvider.id === resolvingProviderId
+        ? data.alerts[alertIndex].assignedProvider
+        : data.alerts[alertIndex].assignedProvider; // In a real app, you'd fetch the provider by ID
 
-      db.data.alerts[alertIndex] = {
-        ...db.data.alerts[alertIndex],
-        resolvedDate: new Date().toISOString(),
-        resolvingProvider: resolvingProvider,
-        actionRequired: false,
-      };
+    data.alerts[alertIndex] = {
+      ...data.alerts[alertIndex],
+      resolvedDate: new Date().toISOString(),
+      resolvingProvider: resolvingProvider,
+      actionRequired: false,
+    };
 
-      await db.write();
+    await saveData(data);
 
-      // Revalidate relevant pages
-      revalidatePath("/alerts");
-      revalidatePath(`/alerts/${id}`);
+    // Revalidate relevant pages
+    revalidatePath("/alerts");
+    revalidatePath(`/alerts/${id}`);
 
-      return db.data.alerts[alertIndex];
-    }
-
-    return null;
+    return data.alerts[alertIndex];
   } catch (error) {
     console.error("Failed to resolve alert:", error);
     throw new Error("Failed to resolve alert");
@@ -332,32 +322,27 @@ export async function reopenAlert(id: string): Promise<Alert | null> {
       throw new Error("Alert ID is required");
     }
 
-    await db.read();
-    const alertIndex =
-      db.data?.alerts.findIndex((alert) => alert.id === id) ?? -1;
+    const data = await getData();
+    const alertIndex = data.alerts.findIndex((alert) => alert.id === id);
 
     if (alertIndex === -1) {
       throw new Error("Alert not found");
     }
 
-    if (db.data?.alerts[alertIndex]) {
-      db.data.alerts[alertIndex] = {
-        ...db.data.alerts[alertIndex],
-        resolvedDate: null,
-        resolvingProvider: null,
-        actionRequired: true,
-      };
+    data.alerts[alertIndex] = {
+      ...data.alerts[alertIndex],
+      resolvedDate: null,
+      resolvingProvider: null,
+      actionRequired: true,
+    };
 
-      await db.write();
+    await saveData(data);
 
-      // Revalidate relevant pages
-      revalidatePath("/alerts");
-      revalidatePath(`/alerts/${id}`);
+    // Revalidate relevant pages
+    revalidatePath("/alerts");
+    revalidatePath(`/alerts/${id}`);
 
-      return db.data.alerts[alertIndex];
-    }
-
-    return null;
+    return data.alerts[alertIndex];
   } catch (error) {
     console.error("Failed to reopen alert:", error);
     throw new Error("Failed to reopen alert");

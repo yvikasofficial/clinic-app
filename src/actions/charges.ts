@@ -1,44 +1,56 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { Charge, ChargeStatus, Payment } from "@/types/charge";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   charges: Charge[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "charges.json");
+// JSONBin API configuration
+const CHARGES_BIN_URL = jsonbin.CHARGES;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { charges: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(CHARGES_BIN_URL, "GET");
+    return response.record || { charges: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { charges: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(CHARGES_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initChargesDB() {
   try {
-    await db.read();
-
-    // Initialize with empty charges array if file doesn't exist
-    if (!db.data) {
-      db.data = { charges: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize charges database:", error);
-    throw new Error("Charges database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all charges
 export async function getCharges(): Promise<Charge[]> {
   try {
-    await db.read();
-    return db.data?.charges || [];
+    const data = await getData();
+    return data.charges || [];
   } catch (error) {
     console.error("Failed to get charges:", error);
     throw new Error("Failed to retrieve charges");
@@ -54,9 +66,9 @@ export async function getChargesByPatientId(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.charges.filter((charge) => charge.patient.id === patientId) || []
+      data.charges.filter((charge) => charge.patient.id === patientId) || []
     );
   } catch (error) {
     console.error("Failed to get charges by patient ID:", error);
@@ -67,27 +79,23 @@ export async function getChargesByPatientId(
 // Add a new charge
 export async function addCharge(charge: Charge): Promise<Charge> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { charges: [] };
-    }
-
     // Validate required fields
     if (!charge.id || !charge.description || !charge.patient?.id) {
       throw new Error("Missing required charge fields");
     }
 
+    const data = await getData();
+
     // Check if charge already exists
-    const existingCharge = db.data.charges.find(
+    const existingCharge = data.charges.find(
       (existingCharge) => existingCharge.id === charge.id
     );
     if (existingCharge) {
       throw new Error("Charge with this ID already exists");
     }
 
-    db.data.charges.push(charge);
-    await db.write();
+    data.charges.push(charge);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/charges");
@@ -113,33 +121,29 @@ export async function updateCharge(
       throw new Error("Charge ID is required");
     }
 
-    await db.read();
-    const chargeIndex =
-      db.data?.charges.findIndex((charge) => charge.id === id) ?? -1;
+    const data = await getData();
+    const chargeIndex = data.charges.findIndex((charge) => charge.id === id);
 
     if (chargeIndex === -1) {
       throw new Error("Charge not found");
     }
 
-    if (db.data?.charges[chargeIndex]) {
-      db.data.charges[chargeIndex] = {
-        ...db.data.charges[chargeIndex],
-        ...updates,
-      };
-      await db.write();
+    data.charges[chargeIndex] = {
+      ...data.charges[chargeIndex],
+      ...updates,
+    };
 
-      // Revalidate relevant pages
-      revalidatePath("/charges");
-      revalidatePath("/payments");
-      revalidatePath(`/charges/${id}`);
-      if (db.data.charges[chargeIndex].patient?.id) {
-        revalidatePath(`/patients/${db.data.charges[chargeIndex].patient.id}`);
-      }
+    await saveData(data);
 
-      return db.data.charges[chargeIndex];
+    // Revalidate relevant pages
+    revalidatePath("/charges");
+    revalidatePath("/payments");
+    revalidatePath(`/charges/${id}`);
+    if (data.charges[chargeIndex].patient?.id) {
+      revalidatePath(`/patients/${data.charges[chargeIndex].patient.id}`);
     }
 
-    return null;
+    return data.charges[chargeIndex];
   } catch (error) {
     console.error("Failed to update charge:", error);
     throw new Error(
@@ -155,29 +159,25 @@ export async function deleteCharge(id: string): Promise<boolean> {
       throw new Error("Charge ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.charges.length || 0;
+    const data = await getData();
+    const initialLength = data.charges.length;
+    const chargeToDelete = data.charges.find((charge) => charge.id === id);
 
-    if (db.data?.charges) {
-      const chargeToDelete = db.data.charges.find((charge) => charge.id === id);
-      db.data.charges = db.data.charges.filter((charge) => charge.id !== id);
-      await db.write();
+    data.charges = data.charges.filter((charge) => charge.id !== id);
 
-      const deleted = db.data.charges.length < initialLength;
+    const deleted = data.charges.length < initialLength;
 
-      if (deleted) {
-        // Revalidate relevant pages
-        revalidatePath("/charges");
-        revalidatePath("/payments");
-        if (chargeToDelete?.patient?.id) {
-          revalidatePath(`/patients/${chargeToDelete.patient.id}`);
-        }
+    if (deleted) {
+      await saveData(data);
+      // Revalidate relevant pages
+      revalidatePath("/charges");
+      revalidatePath("/payments");
+      if (chargeToDelete?.patient?.id) {
+        revalidatePath(`/patients/${chargeToDelete.patient.id}`);
       }
-
-      return deleted;
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete charge:", error);
     throw new Error("Failed to delete charge");
@@ -191,8 +191,8 @@ export async function getChargeById(id: string): Promise<Charge | null> {
       throw new Error("Charge ID is required");
     }
 
-    await db.read();
-    return db.data?.charges.find((charge) => charge.id === id) || null;
+    const data = await getData();
+    return data.charges.find((charge) => charge.id === id) || null;
   } catch (error) {
     console.error("Failed to get charge by ID:", error);
     throw new Error("Failed to retrieve charge");
@@ -206,8 +206,8 @@ export async function getChargesByStatus(status: string): Promise<Charge[]> {
       throw new Error("Status is required");
     }
 
-    await db.read();
-    return db.data?.charges.filter((charge) => charge.status === status) || [];
+    const data = await getData();
+    return data.charges.filter((charge) => charge.status === status) || [];
   } catch (error) {
     console.error("Failed to get charges by status:", error);
     throw new Error("Failed to retrieve charges");
@@ -217,10 +217,8 @@ export async function getChargesByStatus(status: string): Promise<Charge[]> {
 // Get outstanding charges (unpaid or partially paid)
 export async function getOutstandingCharges(): Promise<Charge[]> {
   try {
-    await db.read();
-    return (
-      db.data?.charges.filter((charge) => charge.totalOutstanding > 0) || []
-    );
+    const data = await getData();
+    return data.charges.filter((charge) => charge.totalOutstanding > 0) || [];
   } catch (error) {
     console.error("Failed to get outstanding charges:", error);
     throw new Error("Failed to retrieve outstanding charges");
@@ -236,9 +234,9 @@ export async function getChargesByCreator(
       throw new Error("Creator ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.charges.filter((charge) => charge.creator.id === creatorId) || []
+      data.charges.filter((charge) => charge.creator.id === creatorId) || []
     );
   } catch (error) {
     console.error("Failed to get charges by creator:", error);
@@ -255,10 +253,9 @@ export async function getChargesByLocation(
       throw new Error("Location ID is required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.charges.filter((charge) => charge.locationId === locationId) ||
-      []
+      data.charges.filter((charge) => charge.locationId === locationId) || []
     );
   } catch (error) {
     console.error("Failed to get charges by location:", error);
@@ -276,49 +273,46 @@ export async function addPaymentToCharge(
       throw new Error("Charge ID and payment data are required");
     }
 
-    await db.read();
-    const chargeIndex =
-      db.data?.charges.findIndex((charge) => charge.id === chargeId) ?? -1;
+    const data = await getData();
+    const chargeIndex = data.charges.findIndex(
+      (charge) => charge.id === chargeId
+    );
 
     if (chargeIndex === -1) {
       throw new Error("Charge not found");
     }
 
-    if (db.data?.charges[chargeIndex]) {
-      db.data.charges[chargeIndex].payments.push(payment);
+    data.charges[chargeIndex].payments.push(payment);
 
-      // Recalculate outstanding amount
-      const totalPaid = db.data.charges[chargeIndex].payments.reduce(
-        (sum, pmt) => sum + pmt.amount,
-        0
-      );
-      const totalAdjustments = db.data.charges[chargeIndex].adjustments.reduce(
-        (sum, adj) => sum + adj.amount,
-        0
-      );
-      db.data.charges[chargeIndex].totalOutstanding = Math.max(
-        0,
-        db.data.charges[chargeIndex].total - totalAdjustments - totalPaid
-      );
+    // Recalculate outstanding amount
+    const totalPaid = data.charges[chargeIndex].payments.reduce(
+      (sum, pmt) => sum + pmt.amount,
+      0
+    );
+    const totalAdjustments = data.charges[chargeIndex].adjustments.reduce(
+      (sum, adj) => sum + adj.amount,
+      0
+    );
+    data.charges[chargeIndex].totalOutstanding = Math.max(
+      0,
+      data.charges[chargeIndex].total - totalAdjustments - totalPaid
+    );
 
-      // Update status based on outstanding amount
-      if (db.data.charges[chargeIndex].totalOutstanding === 0) {
-        db.data.charges[chargeIndex].status = ChargeStatus.PAID;
-      } else if (totalPaid > 0) {
-        db.data.charges[chargeIndex].status = ChargeStatus.PARTIALLY_PAID;
-      }
-
-      await db.write();
-
-      // Revalidate relevant pages
-      revalidatePath("/charges");
-      revalidatePath("/payments");
-      revalidatePath(`/charges/${chargeId}`);
-
-      return db.data.charges[chargeIndex];
+    // Update status based on outstanding amount
+    if (data.charges[chargeIndex].totalOutstanding === 0) {
+      data.charges[chargeIndex].status = ChargeStatus.PAID;
+    } else if (totalPaid > 0) {
+      data.charges[chargeIndex].status = ChargeStatus.PARTIALLY_PAID;
     }
 
-    return null;
+    await saveData(data);
+
+    // Revalidate relevant pages
+    revalidatePath("/charges");
+    revalidatePath("/payments");
+    revalidatePath(`/charges/${chargeId}`);
+
+    return data.charges[chargeIndex];
   } catch (error) {
     console.error("Failed to add payment to charge:", error);
     throw new Error("Failed to add payment to charge");

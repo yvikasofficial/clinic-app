@@ -1,32 +1,69 @@
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { Event } from "@/types/event";
 import { revalidatePath } from "next/cache";
+
+// JSONBin configuration
+const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
+const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
+const JSONBIN_BASE_URL = "https://api.jsonbin.io/v3";
 
 // Database structure
 interface Database {
   events: Event[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "events.json");
+// Helper function to make JSONBin API requests
+async function makeJSONBinRequest(
+  method: "GET" | "PUT",
+  data?: Database
+): Promise<Database> {
+  if (!JSONBIN_API_KEY || !JSONBIN_BIN_ID) {
+    throw new Error("JSONBin API key and Bin ID must be configured");
+  }
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { events: [] });
+  const url = `${JSONBIN_BASE_URL}/b/${JSONBIN_BIN_ID}`;
+
+  const headers: Record<string, string> = {
+    "X-Master-Key": JSONBIN_API_KEY,
+  };
+
+  if (method === "PUT") {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: method === "PUT" ? JSON.stringify(data) : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `JSONBin API error: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const result = await response.json();
+
+  // JSONBin returns data in a nested structure for GET requests
+  if (method === "GET") {
+    return result.record || { events: [] };
+  }
+
+  return result;
+}
 
 // Initialize database connection
 export async function initDB() {
   try {
-    await db.read();
-
-    // Initialize with empty events array if file doesn't exist
-    if (!db.data) {
-      db.data = { events: [] };
-      await db.write();
+    // Try to read existing data, if bin doesn't exist, create it with empty events
+    try {
+      await makeJSONBinRequest("GET");
+    } catch (error) {
+      console.error("Failed to initialize database:", error);
+      // If bin doesn't exist or is empty, initialize with empty events array
+      await makeJSONBinRequest("PUT", { events: [] });
     }
   } catch (error) {
     console.error("Failed to initialize database:", error);
@@ -37,8 +74,8 @@ export async function initDB() {
 // Get all events
 export async function getEvents(): Promise<Event[]> {
   try {
-    await db.read();
-    return db.data?.events || [];
+    const data = await makeJSONBinRequest("GET");
+    return data.events || [];
   } catch (error) {
     console.error("Failed to get events:", error);
     throw new Error("Failed to retrieve events");
@@ -48,25 +85,25 @@ export async function getEvents(): Promise<Event[]> {
 // Add a new event
 export async function addEvent(event: Event): Promise<Event> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { events: [] };
-    }
-
     // Validate required fields
     if (!event.id || !event.title || !event.start || !event.end) {
       throw new Error("Missing required event fields");
     }
 
+    // Get current data
+    const data = await makeJSONBinRequest("GET");
+
     // Check if event already exists
-    const existingEvent = db.data.events.find((e) => e.id === event.id);
+    const existingEvent = data.events.find((e) => e.id === event.id);
     if (existingEvent) {
       throw new Error("Event with this ID already exists");
     }
 
-    db.data.events.push(event);
-    await db.write();
+    // Add new event
+    data.events.push(event);
+
+    // Save updated data
+    await makeJSONBinRequest("PUT", data);
 
     // Revalidate relevant pages
     revalidatePath("/events");
@@ -90,28 +127,28 @@ export async function updateEvent(
       throw new Error("Event ID is required");
     }
 
-    await db.read();
-    const eventIndex = db.data?.events.findIndex((e) => e.id === id) ?? -1;
+    // Get current data
+    const data = await makeJSONBinRequest("GET");
+    const eventIndex = data.events.findIndex((e) => e.id === id);
 
     if (eventIndex === -1) {
       throw new Error("Event not found");
     }
 
-    if (db.data?.events[eventIndex]) {
-      db.data.events[eventIndex] = {
-        ...db.data.events[eventIndex],
-        ...updates,
-      };
-      await db.write();
+    // Update the event
+    data.events[eventIndex] = {
+      ...data.events[eventIndex],
+      ...updates,
+    };
 
-      // Revalidate relevant pages
-      revalidatePath("/events");
-      revalidatePath(`/events/${id}`);
+    // Save updated data
+    await makeJSONBinRequest("PUT", data);
 
-      return db.data.events[eventIndex];
-    }
+    // Revalidate relevant pages
+    revalidatePath("/events");
+    revalidatePath(`/events/${id}`);
 
-    return null;
+    return data.events[eventIndex];
   } catch (error) {
     console.error("Failed to update event:", error);
     throw new Error(
@@ -127,24 +164,24 @@ export async function deleteEvent(id: string): Promise<boolean> {
       throw new Error("Event ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.events.length || 0;
+    // Get current data
+    const data = await makeJSONBinRequest("GET");
+    const initialLength = data.events.length;
 
-    if (db.data?.events) {
-      db.data.events = db.data.events.filter((e) => e.id !== id);
-      await db.write();
+    // Filter out the event to delete
+    data.events = data.events.filter((e) => e.id !== id);
 
-      const deleted = db.data.events.length < initialLength;
+    const deleted = data.events.length < initialLength;
 
-      if (deleted) {
-        // Revalidate relevant pages
-        revalidatePath("/events");
-      }
+    if (deleted) {
+      // Save updated data
+      await makeJSONBinRequest("PUT", data);
 
-      return deleted;
+      // Revalidate relevant pages
+      revalidatePath("/events");
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete event:", error);
     throw new Error("Failed to delete event");
@@ -158,8 +195,8 @@ export async function getEventById(id: string): Promise<Event | null> {
       throw new Error("Event ID is required");
     }
 
-    await db.read();
-    return db.data?.events.find((e) => e.id === id) || null;
+    const data = await makeJSONBinRequest("GET");
+    return data.events.find((e) => e.id === id) || null;
   } catch (error) {
     console.error("Failed to get event by ID:", error);
     throw new Error("Failed to retrieve event");
@@ -175,10 +212,9 @@ export async function getEventsByPatientId(
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
+    const data = await makeJSONBinRequest("GET");
     return (
-      db.data?.events.filter((e) => e.appointment?.patientId === patientId) ||
-      []
+      data.events.filter((e) => e.appointment?.patientId === patientId) || []
     );
   } catch (error) {
     console.error("Failed to get events by patient ID:", error);
@@ -195,10 +231,9 @@ export async function getEventsByProviderId(
       throw new Error("Provider ID is required");
     }
 
-    await db.read();
+    const data = await makeJSONBinRequest("GET");
     return (
-      db.data?.events.filter((e) => e.appointment?.providerId === providerId) ||
-      []
+      data.events.filter((e) => e.appointment?.providerId === providerId) || []
     );
   } catch (error) {
     console.error("Failed to get events by provider ID:", error);
@@ -216,9 +251,9 @@ export async function getEventsByDateRange(
       throw new Error("Start date and end date are required");
     }
 
-    await db.read();
+    const data = await makeJSONBinRequest("GET");
     return (
-      db.data?.events.filter((e) => {
+      data.events.filter((e) => {
         const eventStart = new Date(e.start);
         const rangeStart = new Date(startDate);
         const rangeEnd = new Date(endDate);

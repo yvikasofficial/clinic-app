@@ -1,44 +1,55 @@
 "use server";
 
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-import path from "path";
 import { Memo } from "@/types/memo";
 import { revalidatePath } from "next/cache";
+import jsonbin from "@/config/jsonbin";
+import { makeJSONBinRequest } from "@/utils/api";
 
-// Database structure
+// Database structure for JSONBin
 interface Database {
   memos: Memo[];
 }
 
-// Database file path
-const dbPath = path.join(process.cwd(), "src", "db", "memos.json");
+// JSONBin API configuration
+const MEMOS_BIN_URL = jsonbin.MEMOS;
 
-// Initialize database
-const adapter = new JSONFile<Database>(dbPath);
-const db = new Low(adapter, { memos: [] });
+// Get data from JSONBin
+async function getData(): Promise<Database> {
+  try {
+    const response = await makeJSONBinRequest(MEMOS_BIN_URL, "GET");
+    return response.record || { memos: [] };
+  } catch (error) {
+    console.error("Failed to get data from JSONBin:", error);
+    return { memos: [] };
+  }
+}
 
-// Initialize database connection
+// Save data to JSONBin
+async function saveData(data: Database): Promise<void> {
+  try {
+    await makeJSONBinRequest(MEMOS_BIN_URL, "PUT", data);
+  } catch (error) {
+    console.error("Failed to save data to JSONBin:", error);
+    throw new Error("Failed to save data");
+  }
+}
+
+// Initialize database connection (no longer needed for JSONBin, but kept for compatibility)
 export async function initDB() {
   try {
-    await db.read();
-
-    // Initialize with empty memos array if file doesn't exist
-    if (!db.data) {
-      db.data = { memos: [] };
-      await db.write();
-    }
+    // JSONBin doesn't require initialization, but we can test connectivity
+    await getData();
   } catch (error) {
-    console.error("Failed to initialize database:", error);
-    throw new Error("Database initialization failed");
+    console.error("Failed to initialize JSONBin connection:", error);
+    throw new Error("JSONBin connection failed");
   }
 }
 
 // Get all memos
 export async function getMemos(): Promise<Memo[]> {
   try {
-    await db.read();
-    return db.data?.memos || [];
+    const data = await getData();
+    return data.memos || [];
   } catch (error) {
     console.error("Failed to get memos:", error);
     throw new Error("Failed to retrieve memos");
@@ -48,11 +59,7 @@ export async function getMemos(): Promise<Memo[]> {
 // Add a new memo
 export async function addMemo(memo: Memo): Promise<Memo> {
   try {
-    await db.read();
-
-    if (!db.data) {
-      db.data = { memos: [] };
-    }
+    const data = await getData();
 
     // Validate required fields
     if (!memo.id || !memo.note || !memo.patient || !memo.creator) {
@@ -60,7 +67,7 @@ export async function addMemo(memo: Memo): Promise<Memo> {
     }
 
     // Check if memo already exists
-    const existingMemo = db.data.memos.find((m) => m.id === memo.id);
+    const existingMemo = data.memos.find((m) => m.id === memo.id);
     if (existingMemo) {
       throw new Error("Memo with this ID already exists");
     }
@@ -70,8 +77,8 @@ export async function addMemo(memo: Memo): Promise<Memo> {
     memo.createdDate = now;
     memo.updatedDate = now;
 
-    db.data.memos.push(memo);
-    await db.write();
+    data.memos.push(memo);
+    await saveData(data);
 
     // Revalidate relevant pages
     revalidatePath("/memos");
@@ -96,31 +103,28 @@ export async function updateMemo(
       throw new Error("Memo ID is required");
     }
 
-    await db.read();
-    const memoIndex = db.data?.memos.findIndex((m) => m.id === id) ?? -1;
+    const data = await getData();
+    const memoIndex = data.memos.findIndex((m) => m.id === id);
 
     if (memoIndex === -1) {
       throw new Error("Memo not found");
     }
 
-    if (db.data?.memos[memoIndex]) {
-      // Update the memo and set updated timestamp
-      db.data.memos[memoIndex] = {
-        ...db.data.memos[memoIndex],
-        ...updates,
-        updatedDate: new Date().toISOString(),
-      };
-      await db.write();
+    // Update the memo and set updated timestamp
+    data.memos[memoIndex] = {
+      ...data.memos[memoIndex],
+      ...updates,
+      updatedDate: new Date().toISOString(),
+    };
 
-      // Revalidate relevant pages
-      revalidatePath("/memos");
-      revalidatePath(`/memos/${id}`);
-      revalidatePath(`/patients/${db.data.memos[memoIndex].patient.id}`);
+    await saveData(data);
 
-      return db.data.memos[memoIndex];
-    }
+    // Revalidate relevant pages
+    revalidatePath("/memos");
+    revalidatePath(`/memos/${id}`);
+    revalidatePath(`/patients/${data.memos[memoIndex].patient.id}`);
 
-    return null;
+    return data.memos[memoIndex];
   } catch (error) {
     console.error("Failed to update memo:", error);
     throw new Error(
@@ -136,26 +140,25 @@ export async function deleteMemo(id: string): Promise<boolean> {
       throw new Error("Memo ID is required");
     }
 
-    await db.read();
-    const initialLength = db.data?.memos.length || 0;
-    const memoToDelete = db.data?.memos.find((m) => m.id === id);
+    const data = await getData();
+    const initialLength = data.memos.length;
+    const memoToDelete = data.memos.find((m) => m.id === id);
 
-    if (db.data?.memos) {
-      db.data.memos = db.data.memos.filter((m) => m.id !== id);
-      await db.write();
+    data.memos = data.memos.filter((m) => m.id !== id);
 
-      const deleted = db.data.memos.length < initialLength;
+    const deleted = data.memos.length < initialLength;
 
-      if (deleted && memoToDelete) {
+    if (deleted) {
+      await saveData(data);
+
+      if (memoToDelete) {
         // Revalidate relevant pages
         revalidatePath("/memos");
         revalidatePath(`/patients/${memoToDelete.patient.id}`);
       }
-
-      return deleted;
     }
 
-    return false;
+    return deleted;
   } catch (error) {
     console.error("Failed to delete memo:", error);
     throw new Error("Failed to delete memo");
@@ -169,8 +172,8 @@ export async function getMemoById(id: string): Promise<Memo | null> {
       throw new Error("Memo ID is required");
     }
 
-    await db.read();
-    return db.data?.memos.find((m) => m.id === id) || null;
+    const data = await getData();
+    return data.memos.find((m) => m.id === id) || null;
   } catch (error) {
     console.error("Failed to get memo by ID:", error);
     throw new Error("Failed to retrieve memo");
@@ -184,8 +187,8 @@ export async function getMemosByPatientId(patientId: string): Promise<Memo[]> {
       throw new Error("Patient ID is required");
     }
 
-    await db.read();
-    return db.data?.memos.filter((m) => m.patient.id === patientId) || [];
+    const data = await getData();
+    return data.memos.filter((m) => m.patient.id === patientId) || [];
   } catch (error) {
     console.error("Failed to get memos by patient ID:", error);
     throw new Error("Failed to retrieve patient memos");
@@ -199,8 +202,8 @@ export async function getMemosByCreatorId(creatorId: string): Promise<Memo[]> {
       throw new Error("Creator ID is required");
     }
 
-    await db.read();
-    return db.data?.memos.filter((m) => m.creator.id === creatorId) || [];
+    const data = await getData();
+    return data.memos.filter((m) => m.creator.id === creatorId) || [];
   } catch (error) {
     console.error("Failed to get memos by creator ID:", error);
     throw new Error("Failed to retrieve creator memos");
@@ -217,9 +220,9 @@ export async function getMemosByDateRange(
       throw new Error("Start date and end date are required");
     }
 
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.memos.filter((m) => {
+      data.memos.filter((m) => {
         const memoDate = new Date(m.createdDate);
         const rangeStart = new Date(startDate);
         const rangeEnd = new Date(endDate);
@@ -236,9 +239,9 @@ export async function getMemosByDateRange(
 // Get recent memos (optional utility function)
 export async function getRecentMemos(limit: number = 10): Promise<Memo[]> {
   try {
-    await db.read();
+    const data = await getData();
     return (
-      db.data?.memos
+      data.memos
         .sort(
           (a, b) =>
             new Date(b.createdDate).getTime() -
