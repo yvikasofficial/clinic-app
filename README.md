@@ -30,7 +30,7 @@ This project implements a patient profile page based on the provided sample pati
   - [x] Handles patients with extensive records (many payments, notes, appointments)
   - [x] Handles brand-new patients with no data
   - [x] Handles partial data cases (e.g., 10 appointments but no doctor's notes)
-  - [x] Uses JSON file for initial state (no live API required)
+  - [x] Stimulated APIs using next js server functions
 
 ### Technical Implementation
 
